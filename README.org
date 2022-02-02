@@ -4,3 +4,9 @@ Library of bash utility functions.
 
 Until further notice, development is done on the =develop= branch which is
 currently subject to frequent rebases.
+
+** Testing
+
+#+begin_src sh
+make test
+#+end_src

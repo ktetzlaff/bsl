@@ -15,3 +15,6 @@
 # archives in repo root
 /*.tar.gz
 /*.zip
+
+# bats libraries
+/.bats/

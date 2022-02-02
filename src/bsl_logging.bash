@@ -24,7 +24,10 @@
 # logging variables
 ##############################################
 
-declare -a BSLL_LEVEL2SNAME=(
+# Note: The seemingly redundant/unnecessary -g(lobal) option in the following
+# declare statements is required by the (BATS) unit tests.
+
+declare -ga BSLL_LEVEL2SNAME=(
     "ERR"
     "WRN"
     "INF"
@@ -32,7 +35,7 @@ declare -a BSLL_LEVEL2SNAME=(
     "DB2"
 )
 
-declare -a BSLL_LEVEL2LOGGER_PRIO=(
+declare -ga BSLL_LEVEL2LOGGER_PRIO=(
     "error"
     "warning"
     "info"
@@ -41,7 +44,7 @@ declare -a BSLL_LEVEL2LOGGER_PRIO=(
 )
 
 # shellcheck disable=SC2034
-declare -A BSLL_NAME2LEVEL=(
+declare -gA BSLL_NAME2LEVEL=(
     ["ERR"]="0"
     ["WRN"]="1"
     ["INF"]="2"
@@ -61,11 +64,11 @@ declare -A BSLL_NAME2LEVEL=(
     ["debug2"]="4"
 )
 
-[ -v BSL_LOGLEVEL_DEFAULT ] || declare -ir BSL_LOGLEVEL_DEFAULT=2
+[ -v BSL_LOGLEVEL_DEFAULT ] || declare -gir BSL_LOGLEVEL_DEFAULT=2
 
-declare -i BSL_LOGLEVEL=${BSL_LOGLEVEL_DEFAULT}
+declare -gi BSL_LOGLEVEL=${BSL_LOGLEVEL_DEFAULT}
 
-declare -i BSLL_USE_LOGGER=0
+declare -gi BSLL_USE_LOGGER=0
 BSLL_LOGGER_FACILITY='user'
 
 ##############################################

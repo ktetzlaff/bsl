@@ -154,7 +154,7 @@ bsl_create_link() {
     bsl_logd "fn:${FUNCNAME[0]}: ${*}"
 
     local cmd=(
-        "${LN}" '-s'
+        'ln' '-s'
     )
     local backup=0
     local positional=()
