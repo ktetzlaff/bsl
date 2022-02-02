@@ -17,8 +17,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #l#
 
-[ ${_BSL_STRING:-0} -eq 1 ] && return || _BSL_STRING=1
-[ ${BSL_INC_DEBUG:=0} -lt 1 ] || echo "sources: ${BASH_SOURCE[@]}"
+[ "${_BSL_STRING:-0}" -eq 1 ] && return 0 || _BSL_STRING=1
+[ "${BSL_INC_DEBUG:=0}" -lt 1 ] || echo "sources: ${BASH_SOURCE[*]}"
 
 ##############################################
 # string functions
@@ -34,26 +34,28 @@
 #
 bsl_rtrim() {
     local sep=' '
-    [ "${1}" = "-s" ] && { shift; sep="${1}"; shift; } || true
+    if [ "${1}" = "-s" ]; then shift; sep="${1}"; shift; fi
     saved=$(shopt -p extglob)
     shopt -s extglob
+    # shellcheck disable=SC2295
     echo "${*%%*(${sep})}"
     eval "${saved}"
 }
 
 bsl_ltrim() {
     local sep=' '
-    [ "${1}" = "-s" ] && { shift; sep="${1}"; shift; } || true
+    if [ "${1}" = "-s" ]; then shift; sep="${1}"; shift; fi
     saved=$(shopt -p extglob)
     shopt -s extglob
+    # shellcheck disable=SC2295
     echo "${@##*(${sep})}"
     eval "${saved}"
 }
 
 bsl_trim() {
     local sep=' '
-    [ "${1}" = "-s" ] && { shift; sep="${1}"; shift; } || true
-    bsl_rtrim -s "${sep}" $(bsl_ltrim -s "${sep}" "${@}")
+    if [ "${1}" = "-s" ]; then shift; sep="${1}"; shift; fi
+    bsl_rtrim -s "${sep}" "$(bsl_ltrim -s "${sep}" "${@}")"
 }
 
 # Example:
@@ -75,4 +77,4 @@ bsl_split() {
 ##############################################
 # end
 ##############################################
-[ ${BSL_INC_DEBUG} -lt 1 ] || echo "end: ${BASH_SOURCE[0]}"
+[ "${BSL_INC_DEBUG}" -lt 1 ] || echo "end: ${BASH_SOURCE[0]}"

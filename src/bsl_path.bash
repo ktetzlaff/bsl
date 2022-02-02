@@ -17,8 +17,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #l#
 
-[ ${_BSL_PATH:-0} -eq 1 ] && return || _BSL_PATH=1
-[ ${BSL_INC_DEBUG:=0} -lt 1 ] || echo "sources: ${BASH_SOURCE[@]}"
+[ "${_BSL_PATH:-0}" -eq 1 ] && return 0 || _BSL_PATH=1
+[ "${BSL_INC_DEBUG:=0}" -lt 1 ] || echo "sources: ${BASH_SOURCE[*]}"
 
 [ -v BSL_PATH ] || BSL_PATH="$(dirname "${BASH_SOURCE[0]}")"
 
@@ -171,11 +171,12 @@ bsl_path_ls() {
 # WSL)
 #
 bsl_path_add() {
-    eval $(_bsl_path_argparse "${@}")
+    eval "$(_bsl_path_argparse "${@}")"
     if [ -v _bsl_path_argparse_errno ]; then
-        return ${_bsl_path_argparse_errno}
+        return "${_bsl_path_argparse_errno}"
     fi
-    local path=$(bsl_path_print_add "$@") || return $?
+    local path
+    path="$(bsl_path_print_add "$@")" || return $?
     read -r "${variable?}" <<< "${path}"
 }
 
@@ -235,8 +236,8 @@ bsl_path_remove() {
 # // foo => '/bin'
 #
 bsl_path_clean() {
-    local var="${1:-PATH}"
-    local path=$(bsl_path_print_clean "$@") || return 1
+    local var="${1:-PATH}" path
+    path=$(bsl_path_print_clean "$@") || return 1
     read -r "${var?}" <<< "${path}"
 }
 
@@ -250,25 +251,28 @@ bsl_path_clean() {
 #
 bsl_path_print_add() {
     if [ ! -v _bsl_path_argparse ]; then
-        eval $(_bsl_path_argparse "${@}")
+        eval "$(_bsl_path_argparse "${@}")"
     fi
     if [ -v _bsl_path_argparse_errno ]; then
-        return ${_bsl_path_argparse_errno}
+        return "${_bsl_path_argparse_errno}"
     fi
 
     local -a arr
-    IFS=: read -ra cpaths <<< $(bsl_path_print_clean "${variable}")
+    IFS=: read -ra cpaths <<< "$(bsl_path_print_clean "${variable}")"
     local -A cur
     for i in "${!cpaths[@]}"; do
         cur["${cpaths[${i}]}"]="${i}"
     done
 
-    local taccat=$(if [ ${position} -eq 0 ]; then echo tac; else echo cat; fi)
-    IFS=: read -ra npaths <<< "${paths}"
+    local taccat
+    # shellcheck disable=SC2154
+    taccat="$(if [ "${position}" -eq 0 ]; then echo tac; else echo cat; fi)"
+    IFS=: read -ra npaths <<< "${paths[@]}"
     while read -r new; do
         new=$(_bsl_path_canonicalize "${new}")
-        if [ -v cur["${new}"] ]; then
+        if [[ -v cur["${new}"] ]]; then
             if [ "${replace:-0}" -eq 1 ]; then
+                # shellcheck disable=SC2184
                 unset cpaths["${cur[${new}]}"]
             else
                 unset new
@@ -281,7 +285,7 @@ bsl_path_print_add() {
                 *) cpaths=("${new}" "${cpaths[@]}");;
             esac
         fi
-    done <<< "$((for e in "${npaths[@]}"; do echo "${e}"; done) | ${taccat})"
+    done <<< "$({ for e in "${npaths[@]}"; do echo "${e}"; done; } | "${taccat}")"
 
     local IFS=:
     local new="${cpaths[*]}"
@@ -337,7 +341,7 @@ bsl_path_print_clean() {
         [ -z "${p}" ] && continue
 
         # filter out dups while we are here
-        [ -v seen[${p}] ] && continue
+        [[ -v seen[${p}] ]] && continue
         seen[${p}]=true
 
         # store the new path
@@ -351,4 +355,4 @@ bsl_path_print_clean() {
 ##############################################
 # end
 ##############################################
-[ ${BSL_INC_DEBUG} -lt 1 ] || echo "end: ${BASH_SOURCE[0]}"
+[ "${BSL_INC_DEBUG}" -lt 1 ] || echo "end: ${BASH_SOURCE[0]}"

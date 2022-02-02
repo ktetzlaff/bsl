@@ -17,12 +17,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #l#
 
-[ ${_BSL_MISC:-0} -eq 1 ] && return || _BSL_MISC=1
-[ ${BSL_INC_DEBUG:=0} -lt 1 ] || echo "sources: ${BASH_SOURCE[*]}"
+[ "${_BSL_MISC:-0}" -eq 1 ] && return 0 || _BSL_MISC=1
+[ "${BSL_INC_DEBUG:=0}" -lt 1 ] || echo "sources: ${BASH_SOURCE[*]}"
 
 [ -v BSL_PATH ] || BSL_PATH="$(dirname "${BASH_SOURCE[0]}")"
 source "${BSL_PATH}/bsl_logging.bash"
-
 
 ##############################################
 # variables
@@ -63,14 +62,16 @@ bsl_stdin_to_file() {
     local mode="${2:-append}"
     read -r -d '' lines || true
 
-    [[ -v _DRY_RUN || -z "${dst}" ]] && exec {dst}>&1 || {
-            if [ "${mode}" = "replace" ]; then
-                exec {dst}>"${dst}"
-            else
-                exec {dst}>>"${dst}"
-            fi
-        }
-    echo -e "${lines}" >&${dst}
+    if [[ -v _DRY_RUN || -z "${dst}" ]]; then
+        exec {dst}>&1
+    else
+        if [ "${mode}" = "replace" ]; then
+            exec {dst}>"${dst}"
+        else
+            exec {dst}>>"${dst}"
+        fi
+    fi
+    echo -e "${lines}" >&"${dst}"
     exec {dst}>&-
 }
 
@@ -81,43 +82,45 @@ bsl_has_cmd() {
 
 
 bsl_run_cmd() {
-    [ -v _DRY_RUN ] \
-        && bsl_logi "${FUNCNAME[0]}, skip: '${@}'" \
-            || "${@}"
+    if [ -v _DRY_RUN ]; then
+        bsl_logi "${FUNCNAME[0]}, skip: '${*}'"
+    else
+        "${@}"
+    fi
 }
 
 
 bsl_run_cmd_logged() {
-    bsl_logd "${FUNCNAME[0]}, cmd: '${@}'"
+    bsl_logd "${FUNCNAME[0]}, cmd: '${*}'"
     bsl_run_cmd "${@}"
 }
 
 
 bsl_run_cmd_nostdout() {
-    "${@}" >${DEVNULL}
+    "${@}" >"${DEVNULL}"
 }
 
 
 bsl_run_cmd_nostderr() {
-    "${@}" 2>${DEVNULL}
+    "${@}" 2>"${DEVNULL}"
 }
 
 
 bsl_run_cmd_quiet() {
-    "${@}" &>${DEVNULL}
+    "${@}" &>"${DEVNULL}"
 }
 
 
 bsl_with_shopt() {
-    IFS=' ,;:' read -a opts <<< "${1}"
+    IFS=' ,;:' read -ra opts <<< "${1}"
     shift
 
     local opts_saved=() o s
     for o in "${opts[@]}"; do
-        s="$(shopt -p ${o} 2>&- || shopt -op ${o} 2>&- )"
+        s="$(shopt -p "${o}" 2>&- || shopt -op "${o}" 2>&- )"
         #echo "saved: '${s}'"
         opts_saved+=("${s}")
-        shopt -qs ${o} 2>&- || shopt -qo ${o} 2>&-
+        shopt -qs "${o}" 2>&- || shopt -qo "${o}" 2>&-
     done
     "${@}"
     # local IFS='|'
@@ -130,9 +133,9 @@ bsl_with_shopt() {
 
 bsl_with_dir() {
     local dir="${1}"; shift
-    pushd "${dir}" &>${DEVNULL}
+    pushd "${dir}" &>"${DEVNULL}" || return "${?}"
     "${@}"
-    popd &>/dev/null
+    popd &>"${DEVNULL}" || true
 }
 
 
@@ -151,24 +154,14 @@ bsl_create_link() {
     bsl_logd "fn:${FUNCNAME[0]}: ${*}"
 
     local cmd=(
-        ${LN} '-s'
+        "${LN}" '-s'
     )
-    local force=0
-    local quiet=0
-    local debug=${BSL_DEBUG:-0}
     local backup=0
     local positional=()
     local src dst
 
     while [[ "${#}" -gt 0 ]]; do
         case "${1}" in
-            -q|--quiet)
-                [ ${BSL_DEBUG:-0} -eq 1 ] || quiet=1;
-                shift
-                ;;
-            --force|-f)
-                force=1; cmd+=('--force'); shift
-                ;;
             --backup|-b)
                 backup=1; shift
                 ;;
@@ -178,8 +171,8 @@ bsl_create_link() {
         esac
     done
 
-    if [ ${#positional[@]} -ne 2 ]; then
-        bsl_loge "${FUNCNAME[0]}: requires 2 positional arguments, got ${#positional[@]}"
+    if [ "${#positional[@]}" -ne 2 ]; then
+        bsl_loge "${FUNCNAME[0]}: requires 2 positional arguments, got ${#positional[*]}"
         return 1
     fi
     src="${positional[0]}"
@@ -191,23 +184,24 @@ bsl_create_link() {
         bsl_loge "${FUNCNAME[0]}: src does not exist: '${src}'"
         return 2
     elif [ -L "${dst}" ]; then
-        local lnk="$(readlink ${dst})"
+        local lnk
+        lnk="$(readlink "${dst}")"
         if [ "${src}" = "${lnk}" ]; then
             bsl_logi "link already exists: '${dst}' -> '${src}'"
             return 0
         elif [ ! -e "$(lnk)" ] && [ ! -L "$(lnk)" ]; then
             local backup="${dst}.qnap"
             bsl_logi "backup: '${dst}' -> '${backup}' ..."
-            ${MV} "${dst}" "${backup}"
+            mv "${dst}" "${backup}"
         fi
     elif [ -e "${dst}" ]; then
-        if ${DIFF} -qr "${src}" "${dst}" >/dev/null; then
+        if diff -qr "${src}" "${dst}" >"${DEVNULL}"; then
             bsl_logi "no change needed: '${dst}'"
             return 0
-        elif [ ${backup} -eq 1 ]; then
+        elif [ "${backup}" -eq 1 ]; then
             local backup="${dst}.qnap"
             bsl_logi "backup: '${dst}' -> '${backup}' ..."
-            ${MV} "${dst}" "${backup}"
+            mv "${dst}" "${backup}"
         else
             bsl_loge "${FUNCNAME[0]}: dst already exists: '${dst}'"
             bsl_logd "src='${src}', dst='${dst}'"
@@ -226,14 +220,14 @@ bsl_update_file() {
     local src="${1}"
     local dst="${2}"
 
-    if ! ${DIFF} -qr "${src}" "${dst}" >${DEVNULL}; then
+    if ! diff -qr "${src}" "${dst}" >"${DEVNULL}"; then
         if [ -e "${dst}" ]; then
             local backup="${dst}.qnap"
             bsl_logi "backup: '${dst}' -> '${backup}' ..."
-            ${MV} "${dst}" "${backup}"
+            mv "${dst}" "${backup}"
         fi
         bsl_logi "update ${dst} ..."
-        ${CP} "${src}" "${dst}"
+        cp "${src}" "${dst}"
     else
         bsl_logi "no update needed: '${dst}'"
     fi
@@ -248,4 +242,4 @@ bsl_hostname() {
 ##############################################
 # end
 ##############################################
-[ ${BSL_INC_DEBUG} -lt 1 ] || echo "end: ${BASH_SOURCE[0]}"
+[ "${BSL_INC_DEBUG}" -lt 1 ] || echo "end: ${BASH_SOURCE[0]}"

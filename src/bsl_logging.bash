@@ -17,8 +17,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #l#
 
-[ ${_BSL_LOGGING:-0} -eq 1 ] && return || _BSL_LOGGING=1
-[ ${BSL_INC_DEBUG:=0} -lt 1 ] || echo "sources: ${BASH_SOURCE[@]}"
+[ "${_BSL_LOGGING:-0}" -eq 1 ] && return 0 || _BSL_LOGGING=1
+[ "${BSL_INC_DEBUG:=0}" -lt 1 ] || echo "sources: ${BASH_SOURCE[*]}"
 
 ##############################################
 # logging functions
@@ -26,18 +26,21 @@
 bsl_log() {
     local lvl="${1}"
     shift
-
-    echo "[${lvl}] ${@}"
-    logger "[${lvl}] ${@}"
+    local msg="[${lvl}]"
+    if [ -n "${*}" ]; then
+        msg="${msg} ${*}"
+    fi
+    echo "${msg}"
+    logger "${msg}"
 }
 
-bsl_loge() { >&2 bsl_log "ERR" "${@}"; }
-bsl_logw() { >&2 bsl_log "WRN" "${@}"; }
-bsl_logi() {     bsl_log "INF" "${@}"; }
-bsl_logd() { [ ${BSL_DEBUG:-0} -gt 0 ] && bsl_log "DBG" "${@}" || true; }
-bsl_die()  { bsl_loge "${@}"; return 1; }
+bsl_loge() { >&2 bsl_log "ERR" "${*}"; }
+bsl_logw() { >&2 bsl_log "WRN" "${*}"; }
+bsl_logi() {     bsl_log "INF" "${*}"; }
+bsl_logd() { if [ "${BSL_DEBUG:-0}" -gt 0 ]; then bsl_log "DBG" "${*}"; fi; }
+bsl_die()  { bsl_loge "${*}"; return 1; }
 
 ##############################################
 # end
 ##############################################
-[ ${BSL_INC_DEBUG} -lt 1 ] || echo "end: ${BASH_SOURCE[0]}"
+[ "${BSL_INC_DEBUG}" -lt 1 ] || echo "end: ${BASH_SOURCE[0]}"

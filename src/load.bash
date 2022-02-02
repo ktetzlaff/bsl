@@ -17,7 +17,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #l#
 
-[ ${BSL_INC_DEBUG:=0} -lt 1 ] || echo "sources: ${BASH_SOURCE[@]}"
+[ "${BSL_INC_DEBUG:=0}" -lt 1 ] || echo "sources: ${BASH_SOURCE[*]}"
 
 [ -v BSL_PATH ] || BSL_PATH="$(dirname "${BASH_SOURCE[0]}")"
 source "${BSL_PATH}/bsl_logging.bash"
@@ -28,4 +28,4 @@ source "${BSL_PATH}/bsl_misc.bash"
 ##############################################
 # end
 ##############################################
-[ ${BSL_INC_DEBUG} -lt 1 ] || echo "end: ${BASH_SOURCE[0]}"
+[ "${BSL_INC_DEBUG}" -lt 1 ] || echo "end: ${BASH_SOURCE[0]}"
