@@ -1,0 +1,56 @@
+# .gitattributes
+# See http://git-scm.com/book/en/v2/Customizing-Git-Git-Attributes
+
+# default EOL behavior: use LF if not specified otherwise
+* text eol=lf
+
+# text files to be explicitly normalized
+*.c    text
+*.cpp  text
+*.h    text
+*.hpp  text
+
+*.pl   text
+*.pm   text
+*.py   text
+*.rb   text
+*.tcl  text
+*.sql  text
+
+*.cfg  text
+*.conf text
+*.toml text
+*.yml  text
+*.yaml text
+*.xml  text
+*.json text
+
+*.html text
+*.md   text
+*.rst  text
+*.tex  text
+
+*.ps1  text
+
+# text files that will always have LF EOLs
+*.sh   text eol=lf
+*.bash text eol=lf
+
+# text files that will always have CRLF EOLs
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.btm text eol=crlf
+
+# binary files
+*.deb  binary
+*.rpm  binary
+*.jar  binary
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.whl  binary
+*.zip  binary
+*.tar  binary
+
+# diff/merge helper for gpg files
+*.gpg diff=gpg

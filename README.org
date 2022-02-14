@@ -1,0 +1,6 @@
+* Bash Library (BSL)
+
+Library of bash utility functions.
+
+Until further notice, development is done on the =develop= branch which is
+currently subject to frequent rebases.
