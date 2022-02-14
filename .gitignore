@@ -1,0 +1,17 @@
+# ignore typical backup files
+*~
+\#*
+.#*
+~$*
+*.bak
+
+# ignore MacOS generated files
+.DS_Store
+
+# misc
+*.orig
+*.log
+
+# archives in repo root
+/*.tar.gz
+/*.zip
