@@ -21,24 +21,86 @@
 [ "${BSL_INC_DEBUG:=0}" -lt 1 ] || echo "sources: ${BASH_SOURCE[*]}"
 
 ##############################################
+# logging variables
+##############################################
+
+declare -a BSLL_LEVEL2SNAME=(
+    "ERR"
+    "WRN"
+    "INF"
+    "DBG"
+    "DB2"
+)
+
+declare -a BSLL_LEVEL2LOGGER_PRIO=(
+    "error"
+    "warning"
+    "info"
+    "debug"
+    "debug"
+)
+
+# shellcheck disable=SC2034
+declare -A BSLL_NAME2LEVEL=(
+    ["ERR"]="0"
+    ["WRN"]="1"
+    ["INF"]="2"
+    ["DBG"]="3"
+    ["DB2"]="4"
+
+    ["ERROR"]="0"
+    ["WARNING"]="1"
+    ["INFO"]="2"
+    ["DEBUG"]="3"
+    ["DEBUG2"]="4"
+
+    ["error"]="0"
+    ["warning"]="1"
+    ["info"]="2"
+    ["debug"]="3"
+    ["debug2"]="4"
+)
+
+[ -v BSL_LOGLEVEL_DEFAULT ] || declare -ir BSL_LOGLEVEL_DEFAULT=2
+
+declare -i BSL_LOGLEVEL=${BSL_LOGLEVEL_DEFAULT}
+
+declare -i BSLL_USE_LOGGER=0
+BSLL_LOGGER_FACILITY='user'
+
+##############################################
 # logging functions
 ##############################################
 bsl_log() {
-    local lvl="${1}"
-    shift
-    local msg="[${lvl}]"
-    if [ -n "${*}" ]; then
-        msg="${msg} ${*}"
+    local lvl="${1:?need a log level (0..4)}"
+    local skip_prefix="${2:-}"
+    local add_nl="${3:-1}"
+    [ "${lvl}" -gt "${BSL_LOGLEVEL:-${BSL_LOGLEVEL_DEFAULT}}" ] && return 0
+    [ "${#}" -ge 3 ] && shift 3 || shift "${#}"
+
+    local prefix msg eol
+    [ -n "${skip_prefix}" ] || prefix="[${BSLL_LEVEL2SNAME[${lvl}]}]"
+    [ -z "${*}" ] || msg=" ${*}"
+    [ -z "${add_nl}" ] || eol='\n'
+
+    if [ "${lvl}" -lt 2 ]; then
+        printf >&2 "${prefix}%b${eol}" "${msg}"
+    else
+        printf "${prefix}%b${eol}" "${msg}"
     fi
-    echo "${msg}"
-    logger "${msg}"
+
+    [ "${BSLL_USE_LOGGER}" -eq 0 ] \
+        || logger -p "${BSLL_LOGGER_FACILITY}.${BSLL_LEVEL2LOGGER_PRIO[${lvl}]}" "${msg}"
+
+    return 0
 }
 
-bsl_loge() { >&2 bsl_log "ERR" "${*}"; }
-bsl_logw() { >&2 bsl_log "WRN" "${*}"; }
-bsl_logi() {     bsl_log "INF" "${*}"; }
-bsl_logd() { if [ "${BSL_DEBUG:-0}" -gt 0 ]; then bsl_log "DBG" "${*}"; fi; }
-bsl_die()  { bsl_loge "${*}"; return 1; }
+bsl_loge()  { bsl_log 0 '' 1 "${*}"; }
+bsl_logw()  { bsl_log 1 '' 1 "${*}"; }
+bsl_logi()  { bsl_log 2 '' 1 "${*}"; }
+bsl_logd()  { bsl_log 3 '' 1 "${*}"; }
+bsl_logd2() { bsl_log 4 '' 1 "${*}"; }
+bsl_die()   { bsl_loge "${*}"; return 1; }
 
 ##############################################
 # end
