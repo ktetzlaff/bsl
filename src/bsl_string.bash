@@ -20,9 +20,28 @@
 [ "${_BSL_STRING:-0}" -eq 1 ] && return 0 || _BSL_STRING=1
 [ "${BSL_INC_DEBUG:=0}" -lt 1 ] || echo "sources: ${BASH_SOURCE[*]}"
 
+[ -v BSL_PATH ] || BSL_PATH="$(dirname "${BASH_SOURCE[0]}")"
+source "${BSL_PATH}/bsl_logging.bash"
+
 ##############################################
 # string functions
 ##############################################
+
+_bsl_parse_args_sep() {
+    # sets/modifies variables `sep` (str) and `args` (array[str])
+    while [ $# -gt 0 ]; do
+        case "${1}" in
+            -s*)
+                [[ "${#}" -gt 1 || "${#1}" -gt 2 ]] || { bsl_loge "missing separator"; return 1; }
+                if [ "${#1}" -eq 2 ]; then sep="${2}"; shift; else sep="${1:2}"; fi
+                ;;
+            *)
+                args+=("${1}")
+                ;;
+        esac
+        shift
+    done
+}
 
 # Examples:
 #
@@ -30,49 +49,95 @@
 #   bsl_ltrim "  hello  " # -> 'hello  '
 #   bsl_trim  "  hello  " # -> 'hello'
 #
-#   bsl_trim -s ':'  "::hello::" # -> "hello"
+#   bsl_trim -s ':'  '::hello::' # -> 'hello'
 #
 bsl_rtrim() {
     local sep=' '
-    if [ "${1}" = "-s" ]; then shift; sep="${1}"; shift; fi
+    local -a args
+    _bsl_parse_args_sep "${@}"
+    [ "${#args[*]}" -gt 0 ] || return 0
+
     saved=$(shopt -p extglob)
     shopt -s extglob
-    # shellcheck disable=SC2295
-    echo "${*%%*(${sep})}"
+    args=("${args[@]%%+([${sep}])}")
     eval "${saved}"
+    printf '%s' "${args[*]}"
 }
 
 bsl_ltrim() {
     local sep=' '
-    if [ "${1}" = "-s" ]; then shift; sep="${1}"; shift; fi
+    local -a args
+    _bsl_parse_args_sep "${@}"
+    [ "${#args[*]}" -gt 0 ] || return 0
+
     saved=$(shopt -p extglob)
     shopt -s extglob
-    # shellcheck disable=SC2295
-    echo "${@##*(${sep})}"
+    args=("${args[@]##+([${sep}])}")
     eval "${saved}"
+    printf '%s' "${args[*]}"
 }
 
 bsl_trim() {
     local sep=' '
-    if [ "${1}" = "-s" ]; then shift; sep="${1}"; shift; fi
-    bsl_rtrim -s "${sep}" "$(bsl_ltrim -s "${sep}" "${@}")"
+    local -a args
+    _bsl_parse_args_sep "${@}"
+    [ "${#args[*]}" -gt 0 ] || return 0
+
+    bsl_rtrim -s "${sep}" "$(bsl_ltrim -s "${sep}" "${args[@]}")"
 }
 
 # Example:
 #
-#   bsl_join ':' a b c    # -> 'a:b:c'
+#   bsl_join a b c         # -> 'abc'
+#   bsl_join -s: a b c     # -> 'a:b:c'
+#   bsl_join -s', ' a b c  # -> 'a, b, c'
 #
-bsl_join()  { local IFS="${1:-}"; shift; echo "${*}"; }
+bsl_join() {
+    local sep=''
+    _bsl_parse_args_sep "${@}"
+    [ "${#args[*]}" -gt 0 ] || return 0
+
+    local result="${args[0]}"
+    unset "args[0]"
+    for e in "${args[@]}"; do
+        result="${result}${sep}${e}"
+    done
+    printf '%s' "${result}"
+}
 
 # Example:
 #
-#   bsl_split ':' 'a:b:c' # -> ' a b c' (yes, there is a leading ' ')
+#   bsl_split -s ':' 'a:b:c' # -> 'a b c'
 #
 bsl_split() {
-    local sep="${1}"
-    shift
-    echo "${1//*(${sep})/ }"
+    local sep=' '
+    local -a args
+    _bsl_parse_args_sep "${@}"
+    [ "${#args[*]}" -gt 0 ] || return 0
+
+    saved=$(shopt -p extglob)
+    shopt -s extglob
+    args=("${args[@]//+([${sep}])/ }")
+    eval "${saved}"
+    printf '%s' "${args[*]}"
 }
+
+# Example:
+#
+#   bsl_reverse_lines < file
+#
+bsl_reverse_lines() {
+    local in="${1:-/dev/stdin}"
+    [ -e "${in}" ] || { bsl_loge "file not found: '${in}'"; return 1; }
+
+    local output='' line
+    while true; do
+        [ ! -v line ] || printf -v output '%s\n%s' "${line}" "${output}"
+        read -r line || break
+    done < "${in}"
+    printf '%s%s' "${line}" "${output}"
+}
+alias bsl_tac=bsl_reverse_lines
 
 ##############################################
 # end

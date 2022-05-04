@@ -37,19 +37,6 @@ fi
 # misc. functions
 ##############################################
 
-# Example:
-#
-#   bsl_reverse_lines < file
-#
-bsl_reverse_lines() {
-    readarray -t lines
-
-    local i
-    for (( i = "${#lines[@]}"; i--; )); do
-        printf '%s\n' "${lines[i]}"
-    done
-}
-
 bsl_stdin_to_log() {
     local log_fn="${1:-bsl_logi}"
     read -r -d '' lines || true

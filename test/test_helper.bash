@@ -17,6 +17,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #l#
 
+: # keep following shellcheck directive from having file-wide scope
+# shellcheck disable=SC2154
 [ -v REPO_ROOT        ] || REPO_ROOT="$(realpath "${BATS_TEST_DIRNAME}/..")"
 [ -v BSLBATS_BASE_DIR ] || BSLBATS_BASE_DIR="${REPO_ROOT}/.bats"
 [ -v _SUPPORT_DIR     ] || _SUPPORT_DIR="${BSLBATS_BASE_DIR}/bats-support"
@@ -31,18 +33,21 @@ source "${_SUPPORT_DIR}/load.bash"
 source "${_ASSERT_DIR}/load.bash"
 
 bslbats_logi() {
-    >&3 echo -- "# [INF] ${*}"
+    msg="${*:+ ${*}}"
+    >&3 printf -- '# [INF]%s\n' "${msg}"
 }
 
 bslbats_logd() {
     if [ "${BSLBATS_DEBUG:-0}" -gt 0 ]; then
-        >&3 echo -- "# [DBG] ${*}"
+        msg="${*:+ ${*}}"
+        >&3 printf -- '# [DBG]%s\n' "${msg}"
     fi
 }
 
 bslbats_mkfdir() {
     local d
     for d in "${@}"; do
+        # shellcheck disable=SC2154
         mkdir -p "${BATS_FILE_TMPDIR}/${d}"
     done
 }
