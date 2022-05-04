@@ -5,6 +5,12 @@ Library of bash utility functions.
 Until further notice, development is done on the =develop= branch which is
 currently subject to frequent rebases.
 
+** Installation
+
+#+begin_src sh
+PREFIX=~/.local make install
+#+end_src
+
 ** Testing
 
 #+begin_src sh

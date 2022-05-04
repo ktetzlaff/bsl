@@ -16,9 +16,10 @@
 #l#
 
 help:
-	@echo "Targets:"
-	@echo "- test: runs the (unit) tests"
-	@echo "- help: prints this help message"
+	@echo "Commands/Targets:"
+	@echo "- PREFIX=<PREFIX> make install: install src/*.bash to <PREFIX>/lib/bash/"
+	@echo "- make test: runs the (unit) tests"
+	@echo "- make help: prints this help message"
 
 # define the $(sp) macro which has the value ' '
 ifndef blank
@@ -30,6 +31,11 @@ endif
 
 REPO_ROOT := $(subst $(sp),?,$(abspath .))
 
+# variable used for install target
+PREFIX ?= /usr/local
+LIB_DIR := $(PREFIX)/lib/bash/bsl
+
+# variables used for test targets
 BSLBATS_BASE_DIR    ?= $(REPO_ROOT)/.bats
 
 BSLBATS_CORE_VER     ?= v1.5.0-83-ga2fe397
@@ -49,6 +55,11 @@ BATS_SUPPORT := $(BSLBATS_SUPPORT_DIR)/load.bash
 BATS_ASSERT  := $(BSLBATS_ASSERT_DIR)/load.bash
 
 export BSLBATS_BASE_DIR
+
+.PHONY: install test help _bats_all
+
+install:
+	install -vpDt '$(LIB_DIR)' --mode=u=rwX,g=rX,o=rX '$(REPO_ROOT)/src/'*.bash
 
 $(BSLBATS_CORE_INSTALL):
 	git clone '$(BSLBATS_GITHUB)/bats-core.git' $(@D)
@@ -76,5 +87,3 @@ test: _bats_all
 
 test/%: _bats_all
 	@$(BATS) $(@)
-
-.PHONY: test help _bats_all
