@@ -27,6 +27,8 @@ source "${BSL_PATH}/bsl_logging.bash"
 # internal (_bsl_path) functions
 ##############################################
 
+# editorconfig-checker-disable
+
 # _bsl_path_usage ACTION
 #
 # Prints a usage/help message to stderr.
@@ -118,6 +120,8 @@ EOF
     fi
 }
 
+# editorconfig-checker-enable
+
 # _bsl_path_argparse_invalid_opt OPT_NAME [PATHS_NAME]
 #
 # Used in _bsl_path_argparse to handle invalid options.
@@ -160,7 +164,8 @@ _bsl_path_argparse_handle_path() {
             # (e.g. non-existent directories) doesn't make sense (until
             # someone convinces me otherwise)
             cp="$(bsl_path_canonicalize "${p}")" || {
-                [ "${DEBUG:-0}" -lt 1 ] || bsl_logw "${FUNCNAME[0]}: skip '${p}'"
+                [ "${DEBUG:-0}" -lt 1 ] \
+                    || bsl_logw "${FUNCNAME[0]}: skip '${p}'"
                 continue
             }
         fi
@@ -254,7 +259,8 @@ _bsl_path_argparse() {
                     || _bsl_path_argparse_invalid_opt "${refs[@]}" "${1}" \
                     || return "${?}"
                 shift
-                _bsl_path_argparse_handle_path "${action}" "${refs[1]}" "${1}" || true
+                _bsl_path_argparse_handle_path \
+                    "${action}" "${refs[1]}" "${1}" || true
                 ;;
             --var*)
                 shift
@@ -275,7 +281,9 @@ _bsl_path_argparse() {
                 elif [ -z "${opt['varname']}" ]; then
                     opt['varname']="${1}"
                 else
+                    # editorconfig-checker-disable
                     bsl_loge "duplicate VARNAME - '${1}' would overwrite '${opt['varname']}'"
+                    # editorconfig-checker-enable
                     opt_ref=()
                     paths_ref=()
                     return 3

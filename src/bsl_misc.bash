@@ -151,7 +151,9 @@ bsl_create_link() {
     done
 
     if [ "${#positional[@]}" -ne 2 ]; then
+        # editorconfig-checker-disable
         bsl_loge "${FUNCNAME[0]}: requires 2 positional arguments, got ${#positional[*]}"
+        # editorconfig-checker-enable
         return 1
     fi
     src="${positional[0]}"
@@ -213,7 +215,9 @@ bsl_update_file() {
 }
 
 bsl_hostname() {
-    { bsl_run_cmd_nostderr hostname || uname -n || echo "${HOSTNAME}"; } | cut -d. -f1
+    {
+        bsl_run_cmd_nostderr hostname uname -n echo "${HOSTNAME}"
+    } | cut -d. -f1
 }
 
 ##############################################

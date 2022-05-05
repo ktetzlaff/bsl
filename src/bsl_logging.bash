@@ -79,6 +79,7 @@ bsl_log() {
     local skip_prefix="${2:-}"
     local add_nl="${3:-1}"
     [ "${lvl}" -gt "${BSL_LOGLEVEL:-${BSL_LOGLEVEL_DEFAULT}}" ] && return 0
+    # shellcheck disable=SC2015
     [ "${#}" -ge 3 ] && shift 3 || shift "${#}"
 
     local prefix msg eol
@@ -92,8 +93,10 @@ bsl_log() {
         printf "${prefix}%b${eol}" "${msg}"
     fi
 
+    # editorconfig-checker-disable
     [ "${BSLL_USE_LOGGER}" -eq 0 ] \
         || logger -p "${BSLL_LOGGER_FACILITY}.${BSLL_LEVEL2LOGGER_PRIO[${lvl}]}" "${msg}"
+    # editorconfig-checker-enable
 
     return 0
 }

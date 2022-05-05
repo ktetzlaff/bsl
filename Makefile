@@ -16,17 +16,18 @@
 #l#
 
 help:
-	@echo "Commands/Targets:"
-	@echo "- PREFIX=<PREFIX> make install: install src/*.bash to <PREFIX>/lib/bash/"
-	@echo "- make test: runs the (unit) tests"
-	@echo "- make help: prints this help message"
+	@echo 'Commands/Targets:'
+	@echo '- install: install src/*.bash to <PREFIX>/lib/bash/'
+	@echo '           Example: PREFIX=$${HOME}/.local make install'
+	@echo '- test: runs the (unit) tests'
+	@echo '- help: prints this help message'
 
 # define the $(sp) macro which has the value ' '
 ifndef blank
-  blank :=
+    blank := # editorconfig-checker-disable
 endif
 ifndef sp
-  sp := $(blank) $(blank)
+    sp := $(blank) $(blank) # editorconfig-checker-disable
 endif
 
 REPO_ROOT := $(subst $(sp),?,$(abspath .))
