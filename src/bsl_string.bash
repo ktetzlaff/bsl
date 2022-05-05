@@ -32,8 +32,16 @@ _bsl_parse_args_sep() {
     while [ $# -gt 0 ]; do
         case "${1}" in
             -s*)
-                [[ "${#}" -gt 1 || "${#1}" -gt 2 ]] || { bsl_loge "missing separator"; return 1; }
-                if [ "${#1}" -eq 2 ]; then sep="${2}"; shift; else sep="${1:2}"; fi
+                [[ "${#}" -gt 1 || "${#1}" -gt 2 ]] || {
+                    bsl_loge "missing separator"
+                    return 1
+                }
+                if [ "${#1}" -eq 2 ]; then
+                    sep="${2}"
+                    shift
+                else
+                    sep="${1:2}"
+                fi
                 ;;
             *)
                 args+=("${1}")
@@ -128,13 +136,16 @@ bsl_split() {
 #
 bsl_reverse_lines() {
     local in="${1:-/dev/stdin}"
-    [ -e "${in}" ] || { bsl_loge "file not found: '${in}'"; return 1; }
+    [ -e "${in}" ] || {
+        bsl_loge "file not found: '${in}'"
+        return 1
+    }
 
     local output='' line
     while true; do
         [ ! -v line ] || printf -v output '%s\n%s' "${line}" "${output}"
         read -r line || break
-    done < "${in}"
+    done <"${in}"
     printf '%s%s' "${line}" "${output}"
 }
 alias bsl_tac=bsl_reverse_lines

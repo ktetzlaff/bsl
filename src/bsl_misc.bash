@@ -43,7 +43,6 @@ bsl_stdin_to_log() {
     "${log_fn}" "${lines}"
 }
 
-
 bsl_stdin_to_file() {
     local dst="${1:-}"
     local mode="${2:-append}"
@@ -62,11 +61,9 @@ bsl_stdin_to_file() {
     exec {dst}>&-
 }
 
-
 bsl_has_cmd() {
     bsl_run_cmd_quiet type -p "${1}"
 }
-
 
 bsl_run_cmd() {
     if [ -v _DRY_RUN ]; then
@@ -76,35 +73,30 @@ bsl_run_cmd() {
     fi
 }
 
-
 bsl_run_cmd_logged() {
     bsl_logd "${FUNCNAME[0]}, cmd: '${*}'"
     bsl_run_cmd "${@}"
 }
 
-
 bsl_run_cmd_nostdout() {
     "${@}" >"${DEVNULL}"
 }
-
 
 bsl_run_cmd_nostderr() {
     "${@}" 2>"${DEVNULL}"
 }
 
-
 bsl_run_cmd_quiet() {
     "${@}" &>"${DEVNULL}"
 }
 
-
 bsl_with_shopt() {
-    IFS=' ,;:' read -ra opts <<< "${1}"
+    IFS=' ,;:' read -ra opts <<<"${1}"
     shift
 
     local opts_saved=() o s
     for o in "${opts[@]}"; do
-        s="$(shopt -p "${o}" 2>&- || shopt -op "${o}" 2>&- )"
+        s="$(shopt -p "${o}" 2>&- || shopt -op "${o}" 2>&-)"
         #echo "saved: '${s}'"
         opts_saved+=("${s}")
         shopt -qs "${o}" 2>&- || shopt -qo "${o}" 2>&-
@@ -117,14 +109,13 @@ bsl_with_shopt() {
     done
 }
 
-
 bsl_with_dir() {
-    local dir="${1}"; shift
+    local dir="${1}"
+    shift
     pushd "${dir}" &>"${DEVNULL}" || return "${?}"
     "${@}"
     popd &>"${DEVNULL}" || true
 }
-
 
 bsl_create_backup_file() {
     local src="${1}"
@@ -135,7 +126,6 @@ bsl_create_backup_file() {
     bsl_logd "create backup: '${dst}'"
     bsl_run_cmd cp -a "${src}" "${dst}"
 }
-
 
 bsl_create_link() {
     bsl_logd "fn:${FUNCNAME[0]}: ${*}"
@@ -149,11 +139,13 @@ bsl_create_link() {
 
     while [[ "${#}" -gt 0 ]]; do
         case "${1}" in
-            --backup|-b)
-                backup=1; shift
+            --backup | -b)
+                backup=1
+                shift
                 ;;
             *)
-                positional+=("${1}"); shift
+                positional+=("${1}")
+                shift
                 ;;
         esac
     done
@@ -201,7 +193,6 @@ bsl_create_link() {
     return 0
 }
 
-
 bsl_update_file() {
     bsl_logd "fn:${FUNCNAME[0]}: ${*}"
     local src="${1}"
@@ -220,7 +211,6 @@ bsl_update_file() {
     fi
     return 0
 }
-
 
 bsl_hostname() {
     { bsl_run_cmd_nostderr hostname || uname -n || echo "${HOSTNAME}"; } | cut -d. -f1

@@ -21,6 +21,7 @@
 [ "${BSL_INC_DEBUG:=0}" -lt 1 ] || echo "sources: ${BASH_SOURCE[*]}"
 
 [ -v BSL_PATH ] || BSL_PATH="$(dirname "${BASH_SOURCE[0]}")"
+source "${BSL_PATH}/bsl_logging.bash"
 
 ##############################################
 # internal (_bsl_path) functions
@@ -34,7 +35,7 @@ _bsl_path_usage() {
     local action="${1:-add}"
 
     if [ "${action}" = "ls" ]; then
-        1>&2 cat <<-'EOF'
+        cat 1>&2 <<-'EOF'
 Usage: bsl_path_ls [--varname VARNAME] [VARNAME]
 
 List elements of value of VARNAME (default: PATH), each on a seperate line.
@@ -42,7 +43,7 @@ EOF
         return 0
     elif [ "${action}" = "clean" ]; then
 
-        1>&2 cat <<-'EOF'
+        cat 1>&2 <<-'EOF'
 Usage: bsl_path_clean [-v|--verbose] [-n|--dry-run]
        [--varname VARNAME] [VARNAME]
        [--printval]
@@ -60,7 +61,7 @@ EOF
 
     else
 
-    1>&2 cat <<-EOF
+        cat 1>&2 <<-EOF
 Usage: bsl_path_${action} [-v|--verbose] [-n|--dry-run]
 EOF
 
@@ -72,19 +73,19 @@ EOF
     )
 
     if [ "${action}" = "remove" ]; then
-        1>&2 cat <<-'EOF'
+        cat 1>&2 <<-'EOF'
        [--varname VARNAME]
        [--path RMPATH]... [RMPATH]...
 EOF
     elif [ "${action}" = "add" ]; then
-        1>&2 cat <<-'EOF'
+        cat 1>&2 <<-'EOF'
        [-a|--append] [-p|--prepend] [-r|--replace]
        [--varname VARNAME]
        [--path ADDPATH]... [ADDPATH]...
 EOF
     fi
 
-    1>&2 cat <<-EOF
+    cat 1>&2 <<-EOF
 
 ${short["${action}"]} value of VARNAME (default: PATH).
 
@@ -99,13 +100,13 @@ EOF
 
     if [ "${action}" = "remove" ]; then
 
-        1>&2 cat <<-'EOF'
+        cat 1>&2 <<-'EOF'
       --path RMPATH       RMPATH element(s) to remove
 EOF
 
     else
 
-        1>&2 cat <<-'EOF'
+        cat 1>&2 <<-'EOF'
       --path ADDPATH      ADDPATH element(s) to add
   -a, --append            append ADDPATH element(s) (default)
   -p, --prepend           prepend ADDPATH element(s)
@@ -122,16 +123,18 @@ EOF
 # Used in _bsl_path_argparse to handle invalid options.
 #
 _bsl_path_argparse_invalid_opt() {
-    local -n opt_ref="${1}"; shift
+    local -n opt_ref="${1}"
+    shift
     [ ! -v "opt_ref['quiet']" ] || return 0
-    opt_ref=()   # clear opt_ref
+    opt_ref=() # clear opt_ref
 
     if [ "${#}" -gt 1 ]; then
-        paths_ref="${1}"; shift
+        paths_ref="${1}"
+        shift
         paths_ref=() # clear paths_ref
     fi
 
-    1>&2 echo "[ERR] invalid option: '${1}'"
+    bsl_loge "invalid option: '${1}'"
     return 1
 }
 
@@ -146,7 +149,7 @@ _bsl_path_argparse_handle_path() {
     # shellcheck disable=SC2178
     local -n paths_ref="${2}"
     local ahp_unpacked
-    IFS=: read -ra ahp_unpacked <<< "${3}"
+    IFS=: read -ra ahp_unpacked <<<"${3}"
 
     local p cp
     for p in "${ahp_unpacked[@]}"; do
@@ -157,7 +160,7 @@ _bsl_path_argparse_handle_path() {
             # (e.g. non-existent directories) doesn't make sense (until
             # someone convinces me otherwise)
             cp="$(bsl_path_canonicalize "${p}")" || {
-                [ "${DEBUG:-0}" -lt 1 ] || >&2 echo "[WRN] ${FUNCNAME[0]}: skip '${p}'"
+                [ "${DEBUG:-0}" -lt 1 ] || bsl_logw "${FUNCNAME[0]}: skip '${p}'"
                 continue
             }
         fi
@@ -181,7 +184,7 @@ _bsl_path_argparse_handle_path() {
 #   PATHS_NAME.
 #
 _bsl_path_argparse() {
-    local action="${1}";
+    local action="${1}"
     shift
 
     local -a refs=()
@@ -211,36 +214,36 @@ _bsl_path_argparse() {
 
     while [ -n "${1}" ]; do
         case "${1}" in
-            -h|--help|-\?)
+            -h | --help | -\?)
                 _bsl_path_usage "${action}"
                 opt_ref=(['help']=1)
                 return 0
                 ;;
-            -v|--verbose)
-                (( ++opt_ref['verbose'] ))
+            -v | --verbose)
+                ((++opt_ref['verbose']))
                 ;;
-            -n|--dry*)
+            -n | --dry*)
                 opt_ref['dryrun']='1'
                 ;;
-            -q|--quiet)
+            -q | --quiet)
                 opt_ref['quiet']='1'
                 ;;
-            -a|--append|--after)
+            -a | --append | --after)
                 [ -v "opt_ref['position']" ] \
                     || _bsl_path_argparse_invalid_opt "${refs[@]}" "${1}" \
-                                                      || return "${?}"
+                    || return "${?}"
                 opt_ref['position']='-1'
                 ;;
-            -p|--prepend|-b|--before)
+            -p | --prepend | -b | --before)
                 [ -v "opt_ref['position']" ] \
                     || _bsl_path_argparse_invalid_opt "${refs[@]}" "${1}" \
-                                                      || return "${?}"
+                    || return "${?}"
                 opt_ref['position']='0'
                 ;;
-            -r|--replace|-f|--force)
+            -r | --replace | -f | --force)
                 [ -v "opt_ref['replace']" ] \
                     || _bsl_path_argparse_invalid_opt "${refs[@]}" "${1}" \
-                                                      || return "${?}"
+                    || return "${?}"
                 opt_ref['replace']='1'
                 ;;
             --printval*)
@@ -249,7 +252,7 @@ _bsl_path_argparse() {
             --path)
                 [ -R paths_ref ] \
                     || _bsl_path_argparse_invalid_opt "${refs[@]}" "${1}" \
-                                                      || return "${?}"
+                    || return "${?}"
                 shift
                 _bsl_path_argparse_handle_path "${action}" "${refs[1]}" "${1}" || true
                 ;;
@@ -260,7 +263,7 @@ _bsl_path_argparse() {
             -*)
                 # unexpected option - print an error message to stderr return
                 # 1 to indicate an error
-                >&2 echo "[ERR] unexpected option: '${1}'"
+                bsl_loge "unexpected option: '${1}'"
                 opt_ref=()
                 paths_ref=()
                 return 2
@@ -272,7 +275,7 @@ _bsl_path_argparse() {
                 elif [ -z "${opt['varname']}" ]; then
                     opt['varname']="${1}"
                 else
-                    >&2 echo "[ERR] duplicate VARNAME - '${1}' would overwrite '${opt['varname']}'"
+                    bsl_loge "duplicate VARNAME - '${1}' would overwrite '${opt['varname']}'"
                     opt_ref=()
                     paths_ref=()
                     return 3
@@ -314,12 +317,12 @@ bsl_path_canonicalize() {
     local p="${1}"
 
     # invalid: empty path
-    [ -n "${p}" ]            || return 1
+    [ -n "${p}" ] || return 1
     # invalid: anything not starting with '/' (relative path, leading spaces,
     # ...)
-    [ "${p:0:1}" = '/' ]     || return 2
+    [ "${p:0:1}" = '/' ] || return 2
     # invalid: not a directory
-    [ -d "${p}" ]            || return 3
+    [ -d "${p}" ] || return 3
     # invalid: not accessible
     pushd "${p}" &>/dev/null || return 4
 
@@ -353,8 +356,8 @@ bsl_path_ls() {
 
     local varname="${opt['varname']}"
     [ -v "${varname}" ] || {
-        >&2 echo "[ERR] ${FUNCNAME[0]}: '${varname}' not defined"
-        >&2 echo
+        bsl_loge "${FUNCNAME[0]}: '${varname}' not defined"
+        bsl_log 0 1 1
         _bsl_path_usage add
         return 10
     }
@@ -396,7 +399,7 @@ bsl_path_clean() {
     local varname="${opt['varname']}"
 
     local curpaths
-    IFS=: read -ra curpaths <<< "${!varname}"
+    IFS=: read -ra curpaths <<<"${!varname}"
 
     local -a results
     local -A seen
@@ -425,7 +428,7 @@ bsl_path_clean() {
         echo "${varname}=${result}"
     else
         # shellcheck disable=SC2229
-        read -r "${varname}" <<< "${result}"
+        read -r "${varname}" <<<"${result}"
     fi
 }
 
@@ -465,8 +468,8 @@ bsl_path_add() {
     [ ! -v "opt['help']" ] || return 0
 
     [[ "${#addpaths[*]}" -gt 0 || -v "opt['quiet']" ]] || {
-        >&2 echo "[ERR] ${FUNCNAME[0]}: missing ADDPATH"
-        >&2 echo
+        bsl_loge "${FUNCNAME[0]}: missing ADDPATH"
+        bsl_log 0 1 1
         _bsl_path_usage add
         return 10
     }
@@ -475,7 +478,7 @@ bsl_path_add() {
     # if prepending, reverse addpaths
     if [ "${opt['position']}" -eq 0 ]; then
         local -a _tmp
-        for (( i = ${#addpaths[@]}; i--; )); do
+        for ((i = ${#addpaths[@]}; i--; )); do
             _tmp+=("${addpaths[${i}]}")
         done
         addpaths=("${_tmp[@]}")
@@ -486,7 +489,7 @@ bsl_path_add() {
     # build associative array of current path (cpath) to allow duplicate
     # detection
     local curpaths
-    IFS=: read -ra curpaths <<< "$(bsl_path_clean --printval "${varname}")"
+    IFS=: read -ra curpaths <<<"$(bsl_path_clean --printval "${varname}")"
     local -A cur
     for i in "${!curpaths[@]}"; do
         cur["${curpaths[${i}]}"]="${i}"
@@ -542,7 +545,7 @@ bsl_path_add() {
         echo "${varname}=${result}"
     else
         # shellcheck disable=SC2229
-        read -r "${varname}" <<< "${result}"
+        read -r "${varname}" <<<"${result}"
     fi
 }
 
@@ -571,15 +574,15 @@ bsl_path_remove() {
     local varname="${opt['varname']}" result
     if [ "${#rmpaths[*]}" -eq 0 ]; then
         [ -v "opt['quiet']" ] || {
-            >&2 echo "[ERR] ${FUNCNAME[0]}: missing RMPATHs"
-            >&2 echo
+            bsl_loge "${FUNCNAME[0]}: missing RMPATHs"
+            bsl_log 0 1 1
             _bsl_path_usage remove
             return 10
         }
         result="${!varname}"
     else
         local curpaths
-        IFS=: read -ra curpaths <<< "${!varname}:"
+        IFS=: read -ra curpaths <<<"${!varname}:"
         local -a results
         local rmp cp
         for rmp in "${rmpaths[@]}"; do
@@ -603,7 +606,7 @@ bsl_path_remove() {
         echo "${varname}=${result}"
     else
         # shellcheck disable=SC2229
-        read -r "${varname}" <<< "${result}"
+        read -r "${varname}" <<<"${result}"
     fi
 }
 

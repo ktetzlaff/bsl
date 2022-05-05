@@ -19,10 +19,10 @@
 
 : # keep following shellcheck directive from having file-wide scope
 # shellcheck disable=SC2154
-[ -v REPO_ROOT        ] || REPO_ROOT="$(realpath "${BATS_TEST_DIRNAME}/..")"
+[ -v REPO_ROOT ] || REPO_ROOT="$(realpath "${BATS_TEST_DIRNAME}/..")"
 [ -v BSLBATS_BASE_DIR ] || BSLBATS_BASE_DIR="${REPO_ROOT}/.bats"
-[ -v _SUPPORT_DIR     ] || _SUPPORT_DIR="${BSLBATS_BASE_DIR}/bats-support"
-[ -v _ASSERT_DIR      ] || _ASSERT_DIR="${BSLBATS_BASE_DIR}/bats-assert"
+[ -v _SUPPORT_DIR ] || _SUPPORT_DIR="${BSLBATS_BASE_DIR}/bats-support"
+[ -v _ASSERT_DIR ] || _ASSERT_DIR="${BSLBATS_BASE_DIR}/bats-assert"
 
 # allow `source`ing BSL sources
 PATH="${REPO_ROOT}/src:${PATH}"
@@ -34,13 +34,13 @@ source "${_ASSERT_DIR}/load.bash"
 
 bslbats_logi() {
     msg="${*:+ ${*}}"
-    >&3 printf -- '# [INF]%s\n' "${msg}"
+    printf >&3 -- '# [INF]%s\n' "${msg}"
 }
 
 bslbats_logd() {
     if [ "${BSLBATS_DEBUG:-0}" -gt 0 ]; then
         msg="${*:+ ${*}}"
-        >&3 printf -- '# [DBG]%s\n' "${msg}"
+        printf >&3 -- '# [DBG]%s\n' "${msg}"
     fi
 }
 

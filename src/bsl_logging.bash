@@ -98,12 +98,16 @@ bsl_log() {
     return 0
 }
 
-bsl_loge()  { bsl_log 0 '' 1 "${*}"; }
-bsl_logw()  { bsl_log 1 '' 1 "${*}"; }
-bsl_logi()  { bsl_log 2 '' 1 "${*}"; }
-bsl_logd()  { bsl_log 3 '' 1 "${*}"; }
+bsl_loge() { bsl_log 0 '' 1 "${*}"; }
+bsl_logw() { bsl_log 1 '' 1 "${*}"; }
+bsl_logi() { bsl_log 2 '' 1 "${*}"; }
+bsl_logd() { bsl_log 3 '' 1 "${*}"; }
 bsl_logd2() { bsl_log 4 '' 1 "${*}"; }
-bsl_die()   { bsl_loge "${*}"; return 1; }
+
+bsl_die() {
+    bsl_loge "${*}"
+    return 1
+}
 
 ##############################################
 # end
