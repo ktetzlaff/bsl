@@ -16,11 +16,12 @@
 #l#
 
 help:
-	@echo 'Commands/Targets:'
-	@echo '- install: install src/*.bash to <PREFIX>/lib/bash/'
-	@echo '           Example: PREFIX=$${HOME}/.local make install'
-	@echo '- test: runs the (unit) tests'
+	@echo 'Targets:'
 	@echo '- help: prints this help message'
+	@echo '- test: runs the (unit) tests'
+	@echo '- lint: run linters (via docker)'
+	@echo '- install: install src/*.bash to <PREFIX>/lib/bash/'
+	@echo '      Example: PREFIX=$${HOME}/.local make install'
 
 # define the $(sp) macro which has the value ' '
 ifndef blank
@@ -57,10 +58,7 @@ BATS_ASSERT  := $(BSLBATS_ASSERT_DIR)/load.bash
 
 export BSLBATS_BASE_DIR
 
-.PHONY: install test help _bats_all
-
-install:
-	install -vpDt '$(LIB_DIR)' --mode=u=rwX,g=rX,o=rX '$(REPO_ROOT)/src/'*.bash
+.PHONY: help test lint install _bats_all
 
 $(BSLBATS_CORE_INSTALL):
 	git clone '$(BSLBATS_GITHUB)/bats-core.git' $(@D)
@@ -88,3 +86,14 @@ test: _bats_all
 
 test/%: _bats_all
 	@$(BATS) $(@)
+
+lint:
+	docker run \
+	    -e RUN_LOCAL=true \
+	    -e VALIDATE_BASH_EXEC=false \
+	    -e FILTER_REGEX_EXCLUDE='.*/(test/.*\.bats|LICENSE)' \
+	    -v "$${PWD}:/tmp/lint" \
+	    github/super-linter
+
+install:
+	install -vpDt '$(LIB_DIR)' --mode=u=rwX,g=rX,o=rX '$(REPO_ROOT)/src/'*.bash
