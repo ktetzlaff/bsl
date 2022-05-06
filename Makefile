@@ -17,9 +17,10 @@
 
 help:
 	@echo 'Targets:'
-	@echo '- help: prints this help message'
-	@echo '- test: runs the (unit) tests'
-	@echo '- lint: run linters (via docker)'
+	@echo '- help:    prints this help message'
+	@echo '- format:  show source formatting issues (using `shfmt`)'
+	@echo '- test:    runs the (unit) tests'
+	@echo '- lint:    run linters (running `github/super-linter` via docker)'
 	@echo '- install: install src/*.bash to <PREFIX>/lib/bash/'
 	@echo '      Example: PREFIX=$${HOME}/.local make install'
 
@@ -58,7 +59,10 @@ BATS_ASSERT  := $(BSLBATS_ASSERT_DIR)/load.bash
 
 export BSLBATS_BASE_DIR
 
-.PHONY: help test lint install _bats_all
+.PHONY: help format test lint install _bats_all
+
+format:
+	shfmt -d src test
 
 $(BSLBATS_CORE_INSTALL):
 	git clone '$(BSLBATS_GITHUB)/bats-core.git' $(@D)
