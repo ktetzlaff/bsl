@@ -78,13 +78,13 @@ setup() {
 ##############################################################################
 @test "bsl_join: no args" {
     run -0 --keep-empty-lines bsl_join
-    assert_equal "${#lines[*]}" 1
+    assert_equal "${#lines[*]}" 0
     assert_output ''
 }
 
 @test "bsl_join: sep='', no *args" {
     run -0 --keep-empty-lines bsl_join -s ''
-    assert_equal "${#lines[*]}" 1
+    assert_equal "${#lines[*]}" 0
     assert_output ''
 }
 
@@ -131,7 +131,7 @@ setup() {
 
 @test "bsl_join: sep='  ', no *args" {
     run -0 --keep-empty-lines bsl_join -s '  '
-    assert_equal "${#lines[*]}" 1
+    assert_equal "${#lines[*]}" 0
     assert_output ''
 }
 
@@ -141,19 +141,19 @@ setup() {
 }
 
 ##############################################################################
-# split()
+# bsl_split()
 ##############################################################################
 @test "bsl_split: no args" {
     run --keep-empty-lines true
     bslbats_logd "output:'${output}'"
     bslbats_logd "lines[${#lines[*]}]:'${lines[*]}'"
-    [ "${#lines[*]}" -eq 1 ]
+    [ "${#lines[*]}" -eq 0 ]
     assert_output ''
 }
 
 @test "bsl_split: sep='  ', no *args" {
     run -0 --keep-empty-lines bsl_split -s'  '
-    assert [ "${#lines[*]}" -eq 1 ]
+    assert [ "${#lines[*]}" -eq 0 ]
     assert_output ''
 }
 
