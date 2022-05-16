@@ -28,6 +28,7 @@ _bsl_init_lib || return 0
 # Note: The seemingly redundant/unnecessary -g(lobal) option in the following
 # declare statements is required by the (BATS) unit tests.
 
+#D# Map human readable, 3 character level string to numeric log level.
 declare -ga BSLL_LEVEL2SNAME=(
     "ERR"
     "WRN"
@@ -36,6 +37,7 @@ declare -ga BSLL_LEVEL2SNAME=(
     "DB2"
 )
 
+#D# Map `logger` (*syslog*) priority to numeric log level.
 declare -ga BSLL_LEVEL2LOGGER_PRIO=(
     "error"
     "warning"
@@ -44,6 +46,7 @@ declare -ga BSLL_LEVEL2LOGGER_PRIO=(
     "debug"
 )
 
+#D# Map numeric log level to human readable name.
 # shellcheck disable=SC2034
 declare -gA BSLL_NAME2LEVEL=(
     ["ERR"]="0"
@@ -65,16 +68,63 @@ declare -gA BSLL_NAME2LEVEL=(
     ["debug2"]="4"
 )
 
+#D# Default log level (int) to be used to initialize *BSL_LOGLEVEL*.
 [ -v BSL_LOGLEVEL_DEFAULT ] || declare -gir BSL_LOGLEVEL_DEFAULT=2
 
+#D# Log level (int) used by *BSL* logging functions (default= ``2``/``INFO`` ).
 declare -gi BSL_LOGLEVEL=${BSL_LOGLEVEL_DEFAULT}
 
+#D# Flag (bool) which controls if log messages are sent to *syslog* via
+# ``logger`` cmd (default= ``0`` ). #d#
 declare -gi BSLL_USE_LOGGER=0
+#D# Facility used when logging via `logger` (default= ``user`` ).
 BSLL_LOGGER_FACILITY='user'
 
 ##############################################
 # logging functions
 ##############################################
+
+#D#
+# Generic logging function.
+#
+# Log message to console and, when :py:data:`BSLL_USE_LOGGER` is set to ``1``,
+# also to *syslog*.
+#
+# Message is skipped if **lvl** > :py:data:`BSL_LOGLEVEL`.
+#
+# Args:
+#     lvl (int): log level for current message
+#     skip_prefix (bool): if non-empty, don't add level prefix to current
+#                         message
+#     add_nl (bool): if non-empty, add newline to current message
+#     *args (str): All further arguments are joined to form the current
+#          message (using ' ' as separator)
+#
+# Returns:
+#     exit status: ``0`` in case of success, any other value indicates an error
+#     stdout: na
+#
+# Examples:
+#   #. Log error with multiple message arguments::
+#
+#        $ bsl_log 0 '' 1 consecutive spaces will be replaced by single space
+#        [ERR] consecutive spaces will be replaced by single space
+#
+#   #. Log warning with single, preformatted message argument::
+#
+#        $ bsl_log 1 '' 1 'spaces will   be preserved   !'
+#        [WRN] spaces will   be preserved   !
+#
+#   #. Log first info with without newline, log 2nd info without prefix::
+#
+#        $ {
+#        >     bsl_log 2 '' '' unfinished message ...
+#        >     sleep 2 # or do something else ...
+#        >     bsl_log 2 1 1 ' DONE'
+#        > }
+#        [INF] unfinished message ... DONE
+#d#
+# some more comments
 bsl_log() {
     local lvl="${1:?need a log level (0..4)}"
     local skip_prefix="${2:-}"

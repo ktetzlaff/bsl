@@ -29,10 +29,16 @@ bsl_load_lib 'bsl_logging'
 
 # editorconfig-checker-disable
 
-# _bsl_path_usage ACTION
+#D# Print usage message for bsl_path_<action> functions.
 #
-# Prints a usage/help message to stderr.
+# Args:
+#     action (str): one of ls, add, remove, clean
 #
+# Returns:
+#     exit status (int): ``0`` in case of success, any other value indicates an
+#         error
+#
+#     stdout (str): usage message
 _bsl_path_usage() {
     local action="${1:-add}"
 
@@ -122,10 +128,17 @@ EOF
 
 # editorconfig-checker-enable
 
-# _bsl_path_argparse_invalid_opt OPT_NAME [PATHS_NAME]
+#D# Handle invalid options in _bsl_path_argparse.
 #
-# Used in _bsl_path_argparse to handle invalid options.
+# Args:
+#     opt_ref (ref): TODO
 #
+# Returns:
+#     exit status (int): 1
+#
+#     stdout (str): na
+#
+#     stderr (str): error message
 _bsl_path_argparse_invalid_opt() {
     local -n opt_ref="${1}"
     shift
@@ -142,16 +155,20 @@ _bsl_path_argparse_invalid_opt() {
     return 1
 }
 
-# _bsl_path_argparse_handle_path ACTION PATHS_NAME PATH
+#D# Handle PATH (ADDPATH/RMPATH) arguments in _bsl_path_argparse.
 #
-# Handle PATH (ADDPATH/RMPATH) arguments in _bsl_path_argparse. Unpacks
-# multiple elements (e.g. '/bin:/sbin' -> ['/bin', '/sbin']) and skips over
-# invalid paths (s. bsl_path_canonicalize).
+# Unpacks multiple elements (e.g. '/bin:/sbin' -> ['/bin', '/sbin']) and skips
+# over invalid paths (s. bsl_path_canonicalize).
 #
+# Args:
+#     action (str): TODO
+#     paths_ref (ref): TODO
+#     path: TODO
 _bsl_path_argparse_handle_path() {
     local action="${1}"
     # shellcheck disable=SC2178
     local -n paths_ref="${2}"
+
     local ahp_unpacked
     IFS=: read -ra ahp_unpacked <<<"${3}"
 
@@ -174,20 +191,18 @@ _bsl_path_argparse_handle_path() {
     return 0
 }
 
-# _bsl_path_argparse ACTION OPT_NAME [PATHS_NAME] [ARG]...
-#
-# Parse arguments for bsl_path_* functions.
+#D# Parse arguments for bsl_path_<action> functions.
 #
 # Args:
+#     action: Action to be performed, one of [ls, clean, add, remove].
 #
-# - ACTION: Action to be performed, one of [ls, clean, add, remove].
-# - OPT_NAME: Name of an associative array variable. Depending on ARGs,
-#   _bsl_path_argparse will add the following keys: 'variable', 'position',
-#   'replace'.
-# - PATHS_NAME: Only for ACTION add/remove. Name of an array variable.
-#   Depending on ARGs, _bsl_path_argparse will add path elements to
-#   PATHS_NAME.
+#     opt_name: Name of an associative array variable. Depending on ARGs,
+#         _bsl_path_argparse will add the following keys: 'variable',
+#         'position', 'replace'.
 #
+#     paths_name: Only for ACTION add/remove. Name of an array variable.
+#         Depending on ARGs, _bsl_path_argparse will add path elements to
+#         PATHS_NAME.
 _bsl_path_argparse() {
     local action="${1}"
     shift
@@ -302,9 +317,10 @@ _bsl_path_argparse() {
 # public bsl_path functions
 ##############################################
 
-# bsl_path_canonicalize PATH
+#D# Print canonicalized PATH to stdout.
 #
-# Print canonicalized PATH to stdout.
+# Args:
+#     path: A file/dir/... path.
 #
 # The cleanup process allows to detect invalid paths (s. below), resolves '.',
 # '..' and replaces multiple consecutive slashes with a single '/'.
@@ -312,10 +328,10 @@ _bsl_path_argparse() {
 # If an invalid (empty, relative, non-existent, non-accessible, ...) PATH is
 # detected there is no output and the return value is one of:
 #
-# - 1: PATH is empty
-# - 2: PATH does not start with '/' (e.g. relative path)
-# - 3: PATH is not a directory (e.g. file, non-existent location, ...)
-# - 4: PATH is not accessible
+# #. PATH is empty
+# #. PATH does not start with '/' (e.g. relative path)
+# #. PATH is not a directory (e.g. file, non-existent location, ...)
+# #. PATH is not accessible
 #
 # Note: Contrary to `realpath`, bsl_path_canonicalize does not try to resolve
 # symlinks.
@@ -353,10 +369,11 @@ bsl_path_canonicalize() {
     echo "${p}"
 }
 
-# bsl_path_ls VARNAME
-#
-# Print each element of VARNAMEs value on separate line.
-#
+# editorconfig-checker-disable
+#D#
+# .. program-output:: bash -c "source \"${BSL_PATH}/load.bash\"; bsl_path_ls --help"
+#d#
+# editorconfig-checker-enable
 bsl_path_ls() {
     local -A opt=()
     _bsl_path_argparse ls opt "${@}" || return "${?}"
@@ -375,30 +392,38 @@ bsl_path_ls() {
     fi
 }
 
-# bsl_path_clean [VARNAME]
+# editorconfig-checker-disable
+#D#
+# .. program-output:: bash -c "source \"${BSL_PATH}/load.bash\"; bsl_path_clean --help"
 #
-# bsl_path_clean takes an optional VARNAME (default: PATH) and returns
-# (prints) a cleaned up version of the value of VARNAME. The cleaning
-# process will:
+# bsl_path_clean takes an optional VARNAME (default: PATH) and returns (prints)
+# a cleaned up version of the value of VARNAME. The cleaning process will:
 #
-# 1. canonicalize paths containing '.' and duplicate '/' ('/usr//share/../bin'
+# #. canonicalize paths containing '.' and duplicate '/' ('/usr//share/../bin'
 #    => '/usr/bin')
-# 2. remove empty elements (':/bin::' => '/bin')
-# 3. remove relative elements ('/bin:./sbin:.local/bin' => '/bin')
-# 4. remove directories that don't exist or can't be accessed
-# 5. remove duplicates (first element stays, subsequent elements are tossed).
+# #. remove empty elements (':/bin::' => '/bin')
+# #. remove relative elements ('/bin:./sbin:.local/bin' => '/bin')
+# #. remove directories that don't exist or can't be accessed
+# #. remove duplicates (first element stays, subsequent elements are tossed).
 #
 # Examples:
 #
-#   - with foo='/bin:/bin'
-#     $ bsl_path_clean --varname foo # => foo='/bin'
+#   #. with ``foo=/bin:/bin``::
 #
-#   - with PATH='/bin:/bin//:////bin//////:/usr/bin/does not exist/..::'
-#     $ bsl_path_clean # => PATH='/bin'
+#        $ bsl_path_clean -n --varname foo
+#        foo='/bin'
 #
-#   - with PATH='::/bin:/sbin:::./:../some-rel-path::/does not exist'
-#     $ bsl_path_clean # => PATH='/bin:/sbin'
+#   #. with ``PATH=/bin:/bin//:////bin//////:/usr/bin/does not exist``::
 #
+#        $ bsl_path_clean -n
+#        PATH='/bin'
+#
+#   #. with ``PATH=::/bin:/sbin:::./:../some-rel-path::/does not exist``::
+#
+#        $ bsl_path_clean -n
+#        PATH='/bin:/sbin'
+#d#
+# editorconfig-checker-enable
 bsl_path_clean() {
     local -A opt=()
     _bsl_path_argparse clean opt "${@}" || return "${?}"
@@ -440,26 +465,38 @@ bsl_path_clean() {
     fi
 }
 
-# bsl_path_add ...
-#
-# Add directories to the value of VARNAME (default: PATH) and print the
-# result.
+# editorconfig-checker-disable
+#D#
+# .. program-output:: bash -c "source \"${BSL_PATH}/load.bash\"; bsl_path_add --help"
 #
 # Examples:
 #
-#   given: PATH='/bin:/sbin', foo='/usr/bin'
+#   The examples use the ``-n`` (aka ``--dry-run``) option of ``bsl_path_add``
+#   to print the result to *stdout*.
 #
-#   - append '/usr/bin' to value of `PATH`:
-#     $ bsl_path_add /usr/bin           # => PATH='/bin:/sbin:/usr/bin'
+#   Given: ``PATH=/bin:/sbin``, ``foo=/usr/bin``
 #
-#   - prepend '/opt/local/bin' to value of `PATH`:
-#     $ bsl_path_add -p /opt/local/bin  # => PATH='/opt/local/bin:/bin:/sbin'
+#   #. append '/usr/bin' to value of `PATH`::
 #
-#   - append '/bin' to value of `foo`:
-#     $ bsl_path_add --varname foo /bin # => PATH='/usr/bin:/bin'
+#        $ bsl_path_add -n /usr/bin
+#        PATH='/bin:/sbin:/usr/bin'
 #
-#   - move '/sbin' to the beginning of `PATH`:
-#     $ bsl_path_add --replace -p /sbin # => PATH='/sbin:/bin'
+#   #. prepend '/opt/local/bin' to value of `PATH`::
+#
+#        $ bsl_path_add -n -p /opt/local/bin
+#        PATH='/opt/local/bin:/bin:/sbin'
+#
+#   #. append '/bin' to value of `foo`::
+#
+#        $ bsl_path_add -n --varname foo /bin
+#        PATH='/usr/bin:/bin'
+#
+#   #. move '/sbin' to the beginning of `PATH`::
+#
+#        $ bsl_path_add -n --replace -p /sbin
+#        PATH='/sbin:/bin'
+#d#
+# editorconfig-checker-enable
 #
 # KTKT: It turns out that bsl_path_add (measured via: time bsl_path_add -n
 # '/etc') on WSL2 is rather slow at ~120ms (on Intel E3-1575M 3GHz, WSL2
@@ -557,22 +594,27 @@ bsl_path_add() {
     fi
 }
 
-# bsl_path_remove DIR [VARNAME]
-#
-# Removes every instance of DIR from the value of VARNAME (default: PATH).
+# editorconfig-checker-disable
+#D#
+# .. program-output:: bash -c "source \"${BSL_PATH}/load.bash\"; bsl_path_remove --help"
 #
 # Examples:
 #
-#   given: PATH='/bin:/sbin:/usr/bin:/usr/sbin'
+#   #. Given: ``PATH='/bin:/sbin:/usr/bin:/usr/sbin``::
 #
-#   $ bsl_path_remove /notfound # => PATH='/bin:/sbin:/usr/bin:/usr/sbin'
-#   $ bsl_path_remove /usr/bin  # => PATH='/bin:/sbin:/usr/sbin'
+#       $ bsl_path_remove -n /notfound
+#       PATH='/bin:/sbin:/usr/bin:/usr/sbin'
 #
-#   The variable to be modified can be passed by name:
+#       $ bsl_path_remove -n /usr/bin
+#       PATH='/bin:/sbin:/usr/sbin'
 #
-#   $ foo='/bin:/sbin'
-#   $ bsl_path_remove /bin foo # => foo='/sbin'
+#   #. The variable to be modified can be passed by name::
 #
+#       $ foo='/bin:/sbin'
+#       $ bsl_path_remove -n --varname foo /bin
+#       foo='/sbin'
+##d
+# editorconfig-checker-enable
 bsl_path_remove() {
     local -A opt=()
     local -a rmpaths=()
