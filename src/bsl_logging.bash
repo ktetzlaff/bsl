@@ -17,8 +17,9 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #l#
 
-[ "${_BSL_LOGGING:-0}" -eq 1 ] && return 0 || _BSL_LOGGING=1
-[ "${BSL_INC_DEBUG:=0}" -lt 1 ] || echo "sources: ${BASH_SOURCE[*]}"
+[ -v BSL_PATH ] || BSL_PATH="$(dirname "${BASH_SOURCE[0]}")"
+declare -f _bsl_init_lib >/dev/null || source "${BSL_PATH}/init.bash"
+_bsl_init_lib || return 0
 
 ##############################################
 # logging variables
@@ -113,6 +114,5 @@ bsl_die() {
 }
 
 ##############################################
-# end
+_bsl_finalize_lib
 ##############################################
-[ "${BSL_INC_DEBUG}" -lt 1 ] || echo "end: ${BASH_SOURCE[0]}"

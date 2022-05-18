@@ -17,11 +17,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #l#
 
-[ "${_BSL_MISC:-0}" -eq 1 ] && return 0 || _BSL_MISC=1
-[ "${BSL_INC_DEBUG:=0}" -lt 1 ] || echo "sources: ${BASH_SOURCE[*]}"
-
 [ -v BSL_PATH ] || BSL_PATH="$(dirname "${BASH_SOURCE[0]}")"
-source "${BSL_PATH}/bsl_logging.bash"
+declare -f _bsl_init_lib >/dev/null || source "${BSL_PATH}/init.bash"
+_bsl_init_lib || return 0
+
+bsl_load_lib 'bsl_logging'
 
 ##############################################
 # variables
@@ -221,6 +221,5 @@ bsl_hostname() {
 }
 
 ##############################################
-# end
+_bsl_finalize_lib
 ##############################################
-[ "${BSL_INC_DEBUG}" -lt 1 ] || echo "end: ${BASH_SOURCE[0]}"

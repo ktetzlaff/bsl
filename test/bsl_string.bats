@@ -23,9 +23,8 @@
 PATH="${BATS_TEST_DIRNAME:-.}:${PATH}"
 source test_helper.bash
 
-# SUT
-unset _BSL_STRING
-source bsl_string.bash
+# (re-)load SUT
+bsl_load_lib 'bsl_string' 1
 
 setup() {
     :

@@ -24,9 +24,8 @@ source test_helper.bash
 # avoid shellcheck warning: 'SC2154 stderr is referenced but not assigned.'
 stderr=''
 
-# SUT
-unset _BSL_LOGGING
-source bsl_logging.bash
+# (re-)load SUT
+bsl_load_lib 'bsl_logging' 1
 
 setup() {
     BSL_LOGLEVEL="${BSL_LOGLEVEL_DEFAULT}"

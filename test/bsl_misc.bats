@@ -21,9 +21,8 @@
 PATH="${BATS_TEST_DIRNAME:-.}:${PATH}"
 source test_helper.bash
 
-# SUT
-unset _BSL_MISC
-source bsl_misc.bash
+# (re-)load SUT
+bsl_load_lib 'bsl_misc' 1
 
 setup() {
     :

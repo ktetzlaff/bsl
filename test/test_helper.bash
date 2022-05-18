@@ -24,8 +24,8 @@
 [ -v _SUPPORT_DIR ] || _SUPPORT_DIR="${BSLBATS_BASE_DIR}/bats-support"
 [ -v _ASSERT_DIR ] || _ASSERT_DIR="${BSLBATS_BASE_DIR}/bats-assert"
 
-# allow `source`ing BSL sources
-PATH="${REPO_ROOT}/src:${PATH}"
+# shellcheck source=../src/init.bash
+source "${REPO_ROOT}/src/init.bash"
 
 # shellcheck source=../.bats/bats-support/load.bash
 source "${_SUPPORT_DIR}/load.bash"

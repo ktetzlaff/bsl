@@ -1,4 +1,4 @@
-#D# Load BSL libs.
+#D# Load BSL libraries.
 
 #L#
 # Copyright (C) 2022 ktetzlaff <bsl@tetzco.de>
@@ -17,15 +17,20 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #l#
 
-[ "${BSL_INC_DEBUG:=0}" -lt 1 ] || echo "sources: ${BASH_SOURCE[*]}"
-
-[ -v BSL_PATH ] || BSL_PATH="$(dirname "${BASH_SOURCE[0]}")"
-source "${BSL_PATH}/bsl_logging.bash"
-source "${BSL_PATH}/bsl_string.bash"
-source "${BSL_PATH}/bsl_path.bash"
-source "${BSL_PATH}/bsl_misc.bash"
+[ "${BSL_INIT_DEBUG:-0}" -eq 0 ] || {
+    _bsl_init_print_sourced -v 2>/dev/null || echo "sources: ${BASH_SOURCE[*]}"
+}
 
 ##############################################
-# end
+# (re-)load the libs
 ##############################################
-[ "${BSL_INC_DEBUG}" -lt 1 ] || echo "end: ${BASH_SOURCE[0]}"
+
+BSL_PATH="$(dirname "${BASH_SOURCE[0]}")"
+export BSL_PATH
+source "${BSL_PATH}/init.bash"
+# shellcheck disable=SC2119
+bsl_reload
+
+##############################################
+_bsl_finalize_lib
+##############################################

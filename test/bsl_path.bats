@@ -21,9 +21,8 @@
 PATH="${BATS_TEST_DIRNAME:-.}:${PATH}"
 source test_helper.bash
 
-# SUT
-unset _BSL_PATH
-source bsl_path.bash
+# (re-)load SUT
+bsl_load_lib 'bsl_path' 1
 
 REFPATH="$(bslbats_prfdir usr/{bin,sbin} {bin,sbin})"
 declare -r REFPATH
