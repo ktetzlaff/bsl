@@ -139,8 +139,8 @@ endef
 
 define bslbats_switch_branches
     $(call git_switch_branch,$(BSLBATS_CORE_DIR),$(BSLBATS_CORE_VER),install)
-    $(call git_switch_branch,$(BSLBATS_SUPPORT_DIR),$(BSLBATS_SUPPORT_VER))
-    $(call git_switch_branch,$(BSLBATS_ASSERT_DIR),$(BSLBATS_ASSERT_VER))
+    $(call git_switch_branch,$(BSLBATS_SUPPORT_DIR),$(BSLBATS_SUPPORT_VER),)
+    $(call git_switch_branch,$(BSLBATS_ASSERT_DIR),$(BSLBATS_ASSERT_VER),)
 endef
 
 test: _bats_all
