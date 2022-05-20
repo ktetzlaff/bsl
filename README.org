@@ -1,4 +1,10 @@
 * Bash Library (BSL)
+# editorconfig-checker-disable
+# [[https://github.com/ktetzlaff/bsl/actions/workflows/test.yml][https://github.com/ktetzlaff/bsl/actions/workflows/test.yml/badge.svg]]
+[[https://github.com/ktetzlaff/bsl/actions/workflows/test.yml][https://gist.githubusercontent.com/ktetzlaff/c0b639248c938d1d291df0b7da541156/raw/testresults-develop.svg]]
+[[https://github.com/ktetzlaff/bsl/actions/workflows/lint.yml][https://github.com/ktetzlaff/bsl/workflows/Lint%20Code%20Base/badge.svg]]
+[[https://www.gnu.org/licenses/gpl-3.0][https://img.shields.io/badge/License-GPLv3-blue.svg]]
+# editorconfig-checker-enable
 
 Library of bash utility functions.
 

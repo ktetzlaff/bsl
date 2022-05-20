@@ -5,7 +5,7 @@
 # You can adjust the behavior by modifying this file.
 # For more information, see:
 # https://github.com/github/super-linter
-name: 'Lint Code Base'
+name: 'Lint code base'
 
 on:
   push:
@@ -18,7 +18,7 @@ on:
       - 'develop'
 
 jobs:
-  run-lint:
+  lint:
     runs-on: 'ubuntu-latest'
     steps:
       - name: 'Checkout code'
@@ -31,7 +31,7 @@ jobs:
       - name: 'Download and install BATS sources (avoids shellcheck warnings)'
         run: 'make _bats_all'
 
-      - name: 'Lint code base'
+      - name: 'Run github/super-linter/slim@v4'
         uses: 'github/super-linter/slim@v4'
         env:
           VALIDATE_ALL_CODEBASE: true

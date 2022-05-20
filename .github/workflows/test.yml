@@ -1,5 +1,5 @@
 ---
-name: 'Run Tests'
+name: 'Run tests'
 
 on:
   push:
@@ -19,13 +19,17 @@ env:
   TEST_RESULTS_PATH: '.bats/test-results'
 
 jobs:
-  build:
+  test:
     runs-on: 'ubuntu-latest'
     steps:
-      - uses: 'actions/checkout@v3'
+      - name: 'Checkout code'
+        uses: 'actions/checkout@v3'
 
       - name: 'Show GNU make version'
         run: 'make --version'
+
+      - name: 'Show environment'
+        run: 'env'
 
       - name: 'Run tests'
         run: |
@@ -34,9 +38,80 @@ jobs:
           make BATS_EXTRA_FLAGS="${BATS_EXTRA_FLAGS}" test
 
       - name: 'Publish test results'
-        uses: 'EnricoMi/publish-unit-test-result-action@v1'
+        id: 'test-results'
+        # The documentation of EnricoMi/publish-unit-test-result-action uses @v1
+        # (a *moving* tag which marks the latest v1.x version). However, I
+        # prefer a fixed version (currently the v1.36 tag).
+        uses: 'EnricoMi/publish-unit-test-result-action@v1.36'
         if: 'always()'
         with:
+          check_name: 'BATS test results'
           files: |
             .bats/test-results/*.xml
             .bats/test-results/**/*.xml
+
+# The steps below have long lines that are difficult to avoid - so just disable
+# corresponding checks (otherwise, the lint workflow will fail):
+#
+# editorconfig-checker-disable
+# yamllint disable rule:line-length
+      - name: 'Add badge attributes to GITHUB_ENV'
+        shell: 'bash'
+        run: |
+          # update GITHUB_ENV
+          CONCLUSION='${{ fromJSON(steps.test-results.outputs.json).conclusion }}'
+          RUNS_TOTAL='${{ fromJSON(steps.test-results.outputs.json).stats.runs }}'
+          RUNS_SKIP='${{ fromJSON(steps.test-results.outputs.json).stats.runs_skip }}'
+          RUNS_PASS='${{ fromJSON(steps.test-results.outputs.json).stats.runs_succ }}'
+          RUNS_FAIL='${{ fromJSON(steps.test-results.outputs.json).stats.runs_fail }}'
+          RUNS_INCONC='${{ fromJSON(steps.test-results.outputs.json).stats.runs_error }}'
+          RUNS_NOSKIP="$((RUNS_TOTAL - RUNS_SKIP))"
+
+          {
+              echo "REF_NAME=${GITHUB_REF_NAME}"
+
+              echo "CONCLUSION=${CONCLUSION}"
+              echo "RUNS_TOTAL=${RUNS_TOTAL}"
+              echo "RUNS_SKIP=${RUNS_SKIP}"
+              echo "RUNS_PASS=${RUNS_PASS}"
+              echo "RUNS_FAIL=${RUNS_FAIL}"
+              echo "RUNS_INCONC=${RUNS_INCONC}"
+              echo "RUNS_NOSKIP=${RUNS_NOSKIP}"
+
+              case "${CONCLUSION}" in
+                success)
+                  echo "BADGE_COLOR=31c653" >> "${GITHUB_ENV}"
+                  echo "BADGE_DETAILS=pass: ${RUNS_PASS}/${RUNS_NOSKIP}"
+                  ;;
+                failure)
+                  echo "BADGE_COLOR=800000" >> "${GITHUB_ENV}"
+                  echo "BADGE_DETAILS=fail: ${RUNS_FAIL}/${RUNS_NOSKIP}"
+                  ;;
+                neutral)
+                  echo "BADGE_COLOR=696969" >> "${GITHUB_ENV}"
+                  echo "BADGE_DETAILS=pass: ${RUNS_PASS}, fail: ${RUNS_FAIL}, inconc: ${RUNS_INCONC}"
+                  ;;
+                *)
+                  echo "BADGE_COLOR=696969" >> "${GITHUB_ENV}"
+                  echo "BADGE_DETAILS=unknown conclusion: '${CONCLUSION}'"
+                  ;;
+              esac
+          } >> "${GITHUB_ENV}"
+
+          echo "GITHUB_ENV (${GITHUB_ENV}):"
+          cat "${GITHUB_ENV}"
+
+      - name: 'Create badge'
+        uses: 'emibcn/badge-action@v1.2.4'
+        with:
+          label: 'Test'
+          status: '${{ env.CONCLUSION }} (${{ env.BADGE_DETAILS }})'
+          color: '${{ env.BADGE_COLOR }}'
+          path: 'testresults-${{ env.REF_NAME }}.svg'
+
+      - name: 'Upload badge to gist'
+        uses: 'andymckay/append-gist-action@1fbfbbce708a39bd45846f0955ed5521f2099c6d'
+        with:
+          token: '${{ secrets.GIST_TOKEN }}'
+          gistURL: 'https://gist.githubusercontent.com/ktetzlaff/c0b639248c938d1d291df0b7da541156'
+          file: 'testresults-${{ env.REF_NAME }}.svg'
