@@ -31,7 +31,7 @@ jobs:
       - name: 'Download and install BATS sources (avoids shellcheck warnings)'
         run: 'make _bats_all'
 
-      - name: 'Lint Code Base'
+      - name: 'Lint code base'
         uses: 'github/super-linter/slim@v4'
         env:
           VALIDATE_ALL_CODEBASE: true

@@ -69,6 +69,7 @@ LIB_DIR := $(PREFIX)/lib/bash/bsl
 
 # variables used for test targets
 BSLBATS_BASE_DIR ?= $(REPO_ROOT)/.bats
+export BSLBATS_BASE_DIR
 
 BSLBATS_CORE_VER ?= v1.6.0-52-g5c964bb
 BSLBATS_CORE_DIR ?= $(BSLBATS_BASE_DIR)/bats-core
@@ -89,7 +90,9 @@ BATS_ASSERT  := $(BSLBATS_ASSERT_DIR)/load.bash
 
 BSLBATS_GITHUB := https://github.com/bats-core
 
-export BSLBATS_BASE_DIR
+# flags/options passed to the bats unit test tool
+BATS_EXTRA_FLAGS ?=
+BATS_FLAGS       := $(BATS_EXTRA_FLAGS)
 
 #################################################
 # define actual targets
@@ -145,11 +148,11 @@ endef
 
 test: _bats_all
 	@$(call bslbats_switch_branches)
-	@'$(BATS)' $(@)
+	'$(BATS)' $(BATS_FLAGS) $(@)
 
 test/%: _bats_all
 	@$(call bslbats_switch_branches)
-	@'$(BATS)' '$(@)'
+	'$(BATS)' $(BATS_FLAGS) '$(@)'
 
 lint:
 	docker run \

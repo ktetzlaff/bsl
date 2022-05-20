@@ -11,11 +11,32 @@ on:
       - 'main'
       - 'develop'
 
+permissions:
+  checks: 'write'
+  pull-requests: 'write'
+
+env:
+  TEST_RESULTS_PATH: '.bats/test-results'
+
 jobs:
   build:
     runs-on: 'ubuntu-latest'
     steps:
       - uses: 'actions/checkout@v3'
 
+      - name: 'Show GNU make version'
+        run: 'make --version'
+
       - name: 'Run tests'
-        run: 'make test'
+        run: |
+          BATS_EXTRA_FLAGS="--report-formatter junit -o ${TEST_RESULTS_PATH}"
+          mkdir -p "${TEST_RESULTS_PATH}"
+          make BATS_EXTRA_FLAGS="${BATS_EXTRA_FLAGS}" test
+
+      - name: 'Publish test results'
+        uses: 'EnricoMi/publish-unit-test-result-action@v1'
+        if: 'always()'
+        with:
+          files: |
+            .bats/test-results/*.xml
+            .bats/test-results/**/*.xml
