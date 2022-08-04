@@ -220,8 +220,35 @@ bsl_hostname() {
     } | cut -d. -f1
 }
 
+#D#
+# Output current or user defined timestamp to stdout.
+#
+# Args:
+#     unix_time (float): unix time (default: now)
+#
+# Returns:
+#     exit status: ``0`` in case of success, any other value indicates an error
+#     stdout: formatted timestamp
+#
+# Examples:
+#   #. Current timestamp::
+#
+#        $ bsl_timestamp
+#        20220804T180821
+#
+#   #. User defined timestamp::
+#
+#        $ bsl_timestamp 123.456
+#        20220804T180914
+#d#
 bsl_timestamp() {
-    date '+%Y%m%dT%H%M%S'
+    local unix_time="${1:-}"
+
+    if [ -n "${unix_time}" ]; then
+        date -d "@${unix_time}" '+%Y%m%dT%H%M%S'
+    else
+        date '+%Y%m%dT%H%M%S'
+    fi
 }
 
 ##############################################
