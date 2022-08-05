@@ -250,6 +250,41 @@ bsl_timestamp() {
     printf '%(%Y%m%dT%H%M%S)T' "${1:--1}"
 }
 
+#D#
+# Output microsecond ISO8601 timestamp to stdout.
+#
+# If a user defined timestamp is used, the decimal places must be provided using
+# full 6 digits (corresponding to the number of microseconds). The
+# implementation could avoid that by using the external date executable.
+# However, that would result in a considerable decrease in performance.
+#
+# Args:
+#     unix_time (float): unix time with microsecond resolution (default: now)
+#
+# Returns:
+#     exit status: ``0`` in case of success, any other value indicates an error
+#     stdout: ISO8601 formatted timestamp with microsecond resolution
+#
+# Examples:
+#   #. Current timestamp::
+#
+#        $ bsl_timestamp_us
+#        20220805T150602.498229
+#
+#   #. User defined timestamp (unix time/epoch)::
+#
+#        $ bsl_timestamp_us 123.456000
+#        20220804T180914.456000
+#
+#      Note that decimal places for microseconds resolution must be provided
+#      with full 6 digits.
+#d#
+bsl_timestamp_us() {
+    local unix_time="${1:-${EPOCHREALTIME}}"
+    # shellcheck disable=SC2086
+    printf '%(%Y%m%dT%H%M%S)T.%06.0f' ${unix_time/./ }
+}
+
 ##############################################
 _bsl_finalize_lib
 ##############################################
