@@ -221,14 +221,16 @@ bsl_hostname() {
 }
 
 #D#
-# Output current or user defined timestamp to stdout.
+# Output current or user defined ISO8691 timestamp to stdout.
+#
+# The resolution is seconds.
 #
 # Args:
 #     unix_time (float): unix time (default: now)
 #
 # Returns:
 #     exit status: ``0`` in case of success, any other value indicates an error
-#     stdout: formatted timestamp
+#     stdout: ISO8601 formatted timestamp with second resolution
 #
 # Examples:
 #   #. Current timestamp::
@@ -236,19 +238,16 @@ bsl_hostname() {
 #        $ bsl_timestamp
 #        20220804T180821
 #
-#   #. User defined timestamp::
+#   #. User defined timestamp (unix time/epoch)::
 #
 #        $ bsl_timestamp 123.456
 #        20220804T180914
+#
+#      Note that any decimal places get ignored.
 #d#
 bsl_timestamp() {
-    local unix_time="${1:-}"
-
-    if [ -n "${unix_time}" ]; then
-        date -d "@${unix_time}" '+%Y%m%dT%H%M%S'
-    else
-        date '+%Y%m%dT%H%M%S'
-    fi
+    # use default -1 (= now)
+    printf '%(%Y%m%dT%H%M%S)T' "${1:--1}"
 }
 
 ##############################################
