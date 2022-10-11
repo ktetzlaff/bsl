@@ -102,6 +102,7 @@ bsl_trim() {
 #
 bsl_join() {
     local sep=''
+    local -a args
     _bsl_parse_args_sep "${@}"
     [ "${#args[*]}" -gt 0 ] || return 0
 
