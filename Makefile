@@ -21,12 +21,14 @@
 
 help:
 	@echo 'Targets:'
-	@echo '- help:    prints this help message'
-	@echo '- format:  show source formatting issues (using `shfmt`)'
-	@echo '- test:    runs the (unit) tests'
-	@echo '- lint:    run linters (running `github/super-linter` via docker)'
-	@echo '- install: install src/*.bash to <PREFIX>/lib/bash/'
-	@echo '      Example: PREFIX=$${HOME}/.local make install'
+	@echo '- help:             print this help message'
+	@echo '- format:           show source formatting issues (using `shfmt`)'
+	@echo '- test:             run all (unit) tests'
+	@echo '- test/<name>.bats: run (unit) tests in <name>.bats'
+	@echo '- lint:             run linters (running `github/super-linter` via docker)'
+	@echo '- install:          install src/*.bash to <LIB_DIR> (default:'
+	@echo '                    <PREFIX>/lib/bash/bsl)'
+	@echo '                    Example: PREFIX="$${HOME}/.local" make install'
 
 #################################################
 # update GNU make built-in defaults
@@ -65,7 +67,7 @@ REPO_ROOT := $(subst $(sp),?,$(abspath .))
 
 # variable used for install target
 PREFIX ?= /usr/local
-LIB_DIR := $(PREFIX)/lib/bash/bsl
+LIB_DIR ?= $(PREFIX)/lib/bash/bsl
 
 # variables used for test targets
 BSLBATS_BASE_DIR ?= $(REPO_ROOT)/.bats
