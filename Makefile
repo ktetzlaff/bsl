@@ -150,11 +150,11 @@ endef
 
 test: _bats_all
 	@$(call bslbats_switch_branches)
-	'$(BATS)' $(BATS_FLAGS) $(@)
+	BSL_PATH="${REPO_ROOT}/src" '$(BATS)' $(BATS_FLAGS) $(@)
 
 test/%: _bats_all
 	@$(call bslbats_switch_branches)
-	'$(BATS)' $(BATS_FLAGS) '$(@)'
+	BSL_PATH="${REPO_ROOT}/src" '$(BATS)' $(BATS_FLAGS) '$(@)'
 
 lint:
 	docker run \
