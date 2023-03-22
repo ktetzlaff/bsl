@@ -32,6 +32,8 @@ source "${_SUPPORT_DIR}/load.bash"
 # shellcheck source=../.bats/bats-assert/load.bash
 source "${_ASSERT_DIR}/load.bash"
 
+bats_require_minimum_version 1.9.0
+
 bslbats_logi() {
     msg="${*:+ ${*}}"
     printf >&3 -- '# [INF]%s\n' "${msg}"
