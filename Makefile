@@ -158,6 +158,7 @@ test/%: _bats_all
 
 lint:
 	docker run \
+		--rm \
 		-e RUN_LOCAL=true \
 		-e VALIDATE_BASH_EXEC=false \
 		-e FILTER_REGEX_EXCLUDE='.*/(test/.*\.bats|LICENSE)' \
