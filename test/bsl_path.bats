@@ -185,7 +185,7 @@ teardown_file() {
 }
 
 @test "bsl_path_canonicalize fail/4 ('/etc/ssl/private')" {
-    [[ -d '/etc/ssl/private' || -r '/etc/ssl/private' ]] || skip
+    [[ -d '/etc/ssl/private' && ! -r '/etc/ssl/private' ]] || skip
     run -4 bsl_path_canonicalize '/etc/ssl/private'
     assert_output ''
 }
