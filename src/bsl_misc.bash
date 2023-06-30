@@ -67,14 +67,14 @@ bsl_has_cmd() {
 
 bsl_run_cmd() {
     if [ -v _DRY_RUN ]; then
-        bsl_logi "${FUNCNAME[0]}, skip: '${*}'"
+        bsl_logfi "skip: '${*}'"
     else
         "${@}"
     fi
 }
 
 bsl_run_cmd_logged() {
-    bsl_logd "${FUNCNAME[0]}, cmd: '${*}'"
+    bsl_logfd "cmd: '${*}'"
     bsl_run_cmd "${@}"
 }
 
@@ -128,7 +128,7 @@ bsl_create_backup_file() {
 }
 
 bsl_create_link() {
-    bsl_logd "fn:${FUNCNAME[0]}: ${*}"
+    bsl_logfd "${*}"
 
     local cmd=(
         'ln' '-s'
@@ -152,7 +152,7 @@ bsl_create_link() {
 
     if [ "${#positional[@]}" -ne 2 ]; then
         # editorconfig-checker-disable
-        bsl_loge "${FUNCNAME[0]}: requires 2 positional arguments, got ${#positional[*]}"
+        bsl_logfe "requires 2 positional arguments, got ${#positional[*]}"
         # editorconfig-checker-enable
         return 1
     fi
@@ -162,7 +162,7 @@ bsl_create_link() {
     # bsl_logd "dst=${dst}"
 
     if [ ! -e "${src}" ]; then
-        bsl_loge "${FUNCNAME[0]}: src does not exist: '${src}'"
+        bsl_logfe "src does not exist: '${src}'"
         return 2
     elif [ -L "${dst}" ]; then
         local lnk
@@ -184,7 +184,7 @@ bsl_create_link() {
             bsl_logi "backup: '${dst}' -> '${backup}' ..."
             mv "${dst}" "${backup}"
         else
-            bsl_loge "${FUNCNAME[0]}: dst already exists: '${dst}'"
+            bsl_logfe "dst already exists: '${dst}'"
             bsl_logd "src='${src}', dst='${dst}'"
             return 3
         fi
@@ -196,7 +196,7 @@ bsl_create_link() {
 }
 
 bsl_update_file() {
-    bsl_logd "fn:${FUNCNAME[0]}: ${*}"
+    bsl_logfd "${*}"
     local src="${1}"
     local dst="${2}"
 

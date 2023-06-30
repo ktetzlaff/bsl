@@ -183,7 +183,7 @@ _bsl_path_argparse_handle_path() {
             # someone convinces me otherwise)
             cp="$(bsl_path_canonicalize "${p}")" || {
                 [ "${DEBUG:-0}" -lt 1 ] \
-                    || bsl_logw "${FUNCNAME[0]}: skip '${p}'"
+                    || bsl_logfw "skip '${p}'"
                 continue
             }
         fi
@@ -356,8 +356,8 @@ bsl_path_relative_p() {
 bsl_path_directory_p() {
     local p="${1}"
     p="$(bsl_rtrim "${p}")"
-    [[ -d "${p}" || ( ! -f "$(bsl_rtrim -s '/' ${p})" \
-                   && "${p: -1:1}" = '/' )  ]]
+    [[ -d "${p}" || (! -f "$(bsl_rtrim -s '/' "${p}")" &&
+    "${p: -1:1}" = '/') ]]
 }
 
 #D# Print canonicalized PATH to stdout.
@@ -424,7 +424,7 @@ bsl_path_ls() {
 
     local varname="${opt['varname']}"
     [ -v "${varname}" ] || {
-        bsl_loge "${FUNCNAME[0]}: '${varname}' not defined"
+        bsl_logfe "'${varname}' not defined"
         bsl_log 0 1 1
         _bsl_path_usage add
         return 10
@@ -556,7 +556,7 @@ bsl_path_add() {
     [ ! -v "opt['help']" ] || return 0
 
     [[ "${#addpaths[*]}" -gt 0 || -v "opt['quiet']" ]] || {
-        bsl_loge "${FUNCNAME[0]}: missing ADDPATH"
+        bsl_logfe "missing ADDPATH"
         bsl_log 0 1 1
         _bsl_path_usage add
         return 10
@@ -667,7 +667,7 @@ bsl_path_remove() {
     local varname="${opt['varname']}" result
     if [ "${#rmpaths[*]}" -eq 0 ]; then
         [ -v "opt['quiet']" ] || {
-            bsl_loge "${FUNCNAME[0]}: missing RMPATHs"
+            bsl_logfe "missing RMPATHs"
             bsl_log 0 1 1
             _bsl_path_usage remove
             return 10
