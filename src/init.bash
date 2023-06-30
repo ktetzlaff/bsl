@@ -110,7 +110,7 @@ _bsl_init_parse_args() {
                 ;;
             -*)
                 local msg="unknown option: '${1}'"
-                echo "[ERR] ${msg}" 1>&2
+                echo "[ERR] ${msg}" >&2
                 opt['error']="${msg}"
                 return 1
                 ;;
@@ -130,7 +130,7 @@ _bsl_init_parse_args() {
 
     if [ "${BSL_LOGLEVEL:-2}" -gt 2 ]; then
         for k in "${!opt[@]}"; do
-            printf -- "[DBG] %s='%s'\n" "${k}" "${opt[${k}]}"
+            printf -- "[DBG] %s='%s'\n" "${k}" "${opt[${k}]}" >&2
         done
     fi
 }
