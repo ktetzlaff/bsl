@@ -22,6 +22,7 @@ declare -f _bsl_init_lib >/dev/null || source "${BSL_PATH}/init.bash"
 _bsl_init_lib || return 0
 
 bsl_load_lib 'bsl_logging'
+bsl_load_lib 'bsl_string'
 
 ##############################################
 # internal (_bsl_path) functions
@@ -316,6 +317,48 @@ _bsl_path_argparse() {
 ##############################################
 # public bsl_path functions
 ##############################################
+
+#D# Check if PATH is absolute.
+#
+# Args:
+#     path: A file/dir/... path
+#
+# Returns:
+#     exit status (int): ``0`` if PATH is absolute, 1 otherwise
+bsl_path_absolute_p() {
+    local p="${1}"
+    p="$(bsl_ltrim "${p}")"
+    [ "${p:0:1}" = '/' ]
+}
+
+#D# Check if PATH is relative.
+#
+# Args:
+#     path: A file/dir/... path
+#
+# Returns:
+#     exit status (int): ``0`` if PATH is relative, 1 otherwise
+bsl_path_relative_p() {
+    ! bsl_path_absolute_p "${@}"
+}
+
+#D# Check if PATH is a directory.
+#
+# To be detected as directory, PATH must either point to an existing directory
+# or end with a '/'.
+#
+# Args:
+#     path: A file/dir/... path
+#
+# Returns:
+#     exit status (int): ``0`` if PATH is recognized as a directory, 1
+#          otherwise
+bsl_path_directory_p() {
+    local p="${1}"
+    p="$(bsl_rtrim "${p}")"
+    [[ -d "${p}" || ( ! -f "$(bsl_rtrim -s '/' ${p})" \
+                   && "${p: -1:1}" = '/' )  ]]
+}
 
 #D# Print canonicalized PATH to stdout.
 #
