@@ -121,6 +121,14 @@ bsl_log_level() {
                 lvl=${2}
                 shift
                 ;;
+            -i | --increment | ++)
+                lvl="${lvl:-${BSL_LOGLEVEL}}"
+                ((++lvl))
+                ;;
+            -d | --decrement | --)
+                lvl="${lvl:-${BSL_LOGLEVEL}}"
+                ((--lvl))
+                ;;
             -*)
                 # report unknown option?
                 ;;
