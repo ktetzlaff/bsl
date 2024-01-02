@@ -139,7 +139,7 @@ bsl_log_level() {
         shift
     done
 
-    [ -n "${lvl}" ] || {
+    [ -n "${lvl:-}" ] || {
         if [ "${verbose}" -eq 0 ]; then
             printf '%d' "${BSL_LOGLEVEL}"
         else
@@ -172,6 +172,19 @@ bsl_log_level() {
     }
     # update log level
     BSL_LOGLEVEL="${lvl}"
+}
+
+#D# Check is a symbolic loc level is active.
+bsl_log_level_active_p() {
+    local lvl="${1:-}"
+    [ -n "${lvl}" ] || return 1
+    [ "${BSLL_NAME2LEVEL[${lvl^^}]:-999}" -le "${BSL_LOGLEVEL}" ]
+}
+
+bsl_log_level_inactive_p() {
+    local lvl="${1:-}"
+    [ -n "${lvl}" ] || return 1
+    [ "${BSLL_NAME2LEVEL[${lvl^^}]:-999}" -gt "${BSL_LOGLEVEL}" ]
 }
 
 #D#
@@ -214,7 +227,6 @@ bsl_log_level() {
 #        > }
 #        [INF] unfinished message ... DONE
 #d#
-# some more comments
 bsl_log() {
     local lvl="${1:?need a log level (0..4)}"
     local prefix="${2:-}"
