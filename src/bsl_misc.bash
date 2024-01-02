@@ -39,13 +39,16 @@ fi
 
 bsl_stdin_to_log() {
     local log_fn="${1:-bsl_logi}"
+
+    local lines
     read -r -d '' lines || true
     "${log_fn}" "${lines}"
 }
 
 bsl_stdin_to_file() {
-    local dst="${1:-}"
-    local mode="${2:-append}"
+    local dst="${1:-}" mode="${2:-append}"
+
+    local lines
     read -r -d '' lines || true
 
     if [[ -v _DRY_RUN || -z "${dst}" ]]; then
@@ -91,6 +94,7 @@ bsl_run_cmd_quiet() {
 }
 
 bsl_with_shopt() {
+    local -a opts
     IFS=' ,;:' read -ra opts <<<"${1}"
     shift
 
