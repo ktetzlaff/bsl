@@ -64,10 +64,6 @@ bsl_stdin_to_file() {
     exec {dst}>&-
 }
 
-bsl_has_cmd() {
-    bsl_run_cmd_quiet type -p "${1}"
-}
-
 bsl_run_cmd() {
     if [ -v _DRY_RUN ]; then
         bsl_logfi "skip: '${*}'"
@@ -91,6 +87,34 @@ bsl_run_cmd_nostderr() {
 
 bsl_run_cmd_quiet() {
     "${@}" &>"${DEVNULL}"
+}
+
+#D# Run command while catching stdtout and stderr into (nameref) variables.
+#
+# Args:
+#     stdout (str, nameref): variable name for stdout
+#
+#     stderr (str, nameref): variable name for stderr
+#
+#     cmd (str): command to be run
+#
+#     &args (str): args for `command`
+#
+# Returns:
+#     exit status: ```` in case of success, any other value indicates an error
+#     stdout: na
+#d#
+bsl_run_cmd_catch_stdouterr() {
+    local -n __stdout__="${1}" __stderr__="${2}"
+    {
+        IFS=$'\n' read -r -d '' __stdout__;
+        IFS=$'\n' read -r -d '' __stderr__;
+        (IFS=$'\n' read -r -d '' __exit__; return "${__exit__}");
+    } < <((printf '\0%s\0%d\0' "$(((({ shift 2; "${@}"; echo "${?}" 1>&3-; } | tr -d '\0' 1>&4-) 4>&2- 2>&1- | tr -d '\0' 1>&4-) 3>&1- | exit "$(cat)") 4>&1-)" "${?}" 1>&2) 2>&1)
+}
+
+bsl_has_cmd() {
+    bsl_run_cmd_quiet command -v "${1}"
 }
 
 bsl_with_shopt() {
