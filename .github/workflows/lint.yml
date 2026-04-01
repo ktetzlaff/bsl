@@ -3,8 +3,7 @@
 # used in your code base whenever you push a code or open a pull request.
 #
 # You can adjust the behavior by modifying this file.
-# For more information, see:
-# https://github.com/github/super-linter
+# For more information, see: https://github.com/super-linter/super-linter
 name: 'Lint code base'
 
 on:
@@ -20,6 +19,17 @@ on:
 jobs:
   lint:
     runs-on: 'ubuntu-latest'
+    permissions:
+      # contents permission to clone the repository
+      contents: 'read'
+      packages: 'read'
+      # issues and pull-requests permissions to write results as pull
+      # request comments. Omit them if you don't need summary comments
+      issues: 'write'
+      pull-requests: 'write'
+      # To report GitHub Actions status checks. Omit if you don't need
+      # to update commit status
+      statuses: 'write'
     steps:
       - name: 'Checkout code'
         uses: 'actions/checkout@v6'
@@ -31,13 +41,40 @@ jobs:
       - name: 'Download and install BATS sources (avoids shellcheck warnings)'
         run: 'make _bats_all'
 
-      - name: 'Run github/super-linter/slim@v4'
-        uses: 'github/super-linter/slim@v4'
+      - name: 'Run super-linter/super-linter/slim@v8.6.0'
+        uses: 'super-linter/super-linter/slim@v8.6.0'
         env:
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
           VALIDATE_ALL_CODEBASE: true
           DEFAULT_BRANCH: 'develop'
-          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
-          FILTER_REGEX_EXCLUDE: '.*/(test/.*\.bats|LICENSE)'
-          #VALIDATE_BASH: true
-          VALIDATE_BASH_EXEC: false
-          #VALIDATE_MARKDOWN: true
+          IGNORE_GITIGNORED_FILES: true
+          STRIP_DEFAULT_WORKSPACE_FOR_REGEX: true
+          FILTER_REGEX_EXCLUDE: '(^|/)(LICENSE|\.prettierrc.yaml)'
+          VALIDATE_BASH: true
+          _VALIDATE_BASH_EXEC: true
+          VALIDATE_CSS: true
+          VALIDATE_CSS_PRETTIER: true
+          VALIDATE_EDITORCONFIG: true
+          VALIDATE_ENV: true
+          VALIDATE_GITHUB_ACTIONS: true
+          VALIDATE_GITLEAKS: true
+          _VALIDATE_GIT_COMMITLINT: true
+          VALIDATE_GIT_MERGE_CONFLICT_MARKERS: true
+          VALIDATE_HTML: true
+          VALIDATE_HTML_PRETTIER: true
+          VALIDATE_JSCPD: true
+          VALIDATE_JSON: true
+          VALIDATE_JSON_PRETTIER: true
+          VALIDATE_MARKDOWN: true
+          VALIDATE_MARKDOWN_PRETTIER: true
+          VALIDATE_NATURAL_LANGUAGE: true
+          VALIDATE_PRE_COMMIT: true
+          VALIDATE_RENOVATE: true
+          VALIDATE_SHELL_SHFMT: true
+          VALIDATE_SPELL_CODESPELL: true
+          _VALIDATE_TRIVY: true
+          VALIDATE_YAML: true
+          VALIDATE_YAML_PRETTIER: true
+          VALIDATE_YAML_CONFIG_FILE: true
+          VALIDATE_YAML_ERROR_ON_WARNING: true
+          VALIDATE_XML: true

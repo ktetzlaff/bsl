@@ -157,13 +157,53 @@ test/%: _bats_all
 	BSL_PATH="${REPO_ROOT}/src" '$(BATS)' $(BATS_FLAGS) '$(@)'
 
 lint:
+	mkdir -p .superlinter-github
 	docker run \
 		--rm \
-		-e RUN_LOCAL=true \
-		-e VALIDATE_BASH_EXEC=false \
-		-e FILTER_REGEX_EXCLUDE='.*/(test/.*\.bats|LICENSE)' \
+		--user "$${UID}:$${UID}" \
 		-v "$${PWD}:/tmp/lint" \
-		github/super-linter
+		-v "$${PWD}/.superlinter-github:/github" \
+		-e "RUN_LOCAL=true" \
+		-e "SAVE_SUPER_LINTER_OUTPUT=true" \
+		-e "CREATE_LOG_FILE=true" \
+		-e "LOG_LEVEL=$${SUPERLINTER_LOG_LEVEL:-INFO}" \
+		-e "DEFAULT_BRANCH=develop" \
+		-e "IGNORE_GITIGNORED_FILES=true" \
+		-e "STRIP_DEFAULT_WORKSPACE_FOR_REGEX=true" \
+		-e 'FILTER_REGEX_EXCLUDE=(^|/)(\.bats/|doc/build/|LICENSE|\.prettierrc.yaml)' \
+		-e "VALIDATE_BASH=true" \
+		-e "_VALIDATE_BASH_EXEC=true" \
+		-e "_VALIDATE_BIOME_FORMAT=true"\
+		-e "_VALIDATE_BIOME_LINT=true"\
+		-e "_VALIDATE_CHECKOV=true" \
+		-e "VALIDATE_CSS=true" \
+		-e "VALIDATE_CSS_PRETTIER=true" \
+		-e "VALIDATE_EDITORCONFIG=true" \
+		-e "VALIDATE_ENV=true" \
+		-e "VALIDATE_GITHUB_ACTIONS=true" \
+		-e "_VALIDATE_GITHUB_ACTIONS_ZIZMOR=true" \
+		-e "VALIDATE_GITLEAKS=true" \
+		-e "_VALIDATE_GIT_COMMITLINT=true" \
+		-e "VALIDATE_GIT_MERGE_CONFLICT_MARKERS=true" \
+		-e "VALIDATE_HTML=true" \
+		-e "VALIDATE_HTML_PRETTIER=true" \
+		-e "VALIDATE_JSCPD=true" \
+		-e "VALIDATE_JSON=true" \
+		-e "VALIDATE_JSON_PRETTIER=true" \
+		-e "VALIDATE_MARKDOWN=true" \
+		-e "VALIDATE_MARKDOWN_PRETTIER=true" \
+		-e "VALIDATE_NATURAL_LANGUAGE=true" \
+		-e "VALIDATE_PRE_COMMIT=true" \
+		-e "VALIDATE_RENOVATE=true" \
+		-e "VALIDATE_SHELL_SHFMT=true" \
+		-e "VALIDATE_SPELL_CODESPELL=true" \
+		-e "_VALIDATE_TRIVY=true" \
+		-e "VALIDATE_YAML=true" \
+		-e "VALIDATE_YAML_PRETTIER=true" \
+		-e "VALIDATE_YAML_CONFIG_FILE=true" \
+		-e "VALIDATE_YAML_ERROR_ON_WARNING=true" \
+		-e "VALIDATE_XML=true" \
+		ghcr.io/super-linter/super-linter:slim-v8.6.0
 
 install:
 	install -vpDt '$(LIB_DIR)' --mode=u=rwX,g=rX,o=rX '$(REPO_ROOT)/src/'*.bash
