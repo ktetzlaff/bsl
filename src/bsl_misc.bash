@@ -107,10 +107,22 @@ bsl_run_cmd_quiet() {
 bsl_run_cmd_catch_stdouterr() {
     local -n __stdout__="${1}" __stderr__="${2}"
     {
-        IFS=$'\n' read -r -d '' __stdout__;
-        IFS=$'\n' read -r -d '' __stderr__;
-        (IFS=$'\n' read -r -d '' __exit__; return "${__exit__}");
-    } < <((printf '\0%s\0%d\0' "$(((({ shift 2; "${@}"; echo "${?}" 1>&3-; } | tr -d '\0' 1>&4-) 4>&2- 2>&1- | tr -d '\0' 1>&4-) 3>&1- | exit "$(cat)") 4>&1-)" "${?}" 1>&2) 2>&1)
+        IFS=$'\n' read -r -d '' __stdout__
+        IFS=$'\n' read -r -d '' __stderr__
+        (
+            IFS=$'\n' read -r -d '' __exit__
+            return "${__exit__}"
+        )
+    } < <((printf '\0%s\0%d\0' "$(
+        (
+            ( ({
+                shift 2
+                "${@}"
+                echo "${?}" 1>&3-
+                # editorconfig-checker-disable-next-line
+            } | tr -d '\0' 1>&4-) 4>&2- 2>&1- | tr -d '\0' 1>&4-) 3>&1- | exit "$(cat)"
+        ) 4>&1-
+    )" "${?}" 1>&2) 2>&1)
 }
 
 bsl_has_cmd() {
