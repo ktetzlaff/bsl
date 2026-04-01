@@ -18,3 +18,7 @@
 
 # bats libraries
 /.bats/
+
+# super-linter output
+/super-linter-output/
+/super-linter-output.log
