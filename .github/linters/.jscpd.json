@@ -1,0 +1,4 @@
+{
+    "ignore": ["**/.bats/**", "**/doc/build/**"],
+    "noSymlink": "true"
+}

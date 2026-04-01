@@ -47,7 +47,7 @@ _bsl_path_usage() {
         cat 1>&2 <<-'EOF'
 Usage: bsl_path_ls [--varname VARNAME] [VARNAME]
 
-List elements of value of VARNAME (default: PATH), each on a seperate line.
+List elements of value of VARNAME (default: PATH), each on a separate line.
 EOF
         return 0
     elif [ "${action}" = "clean" ]; then
@@ -297,9 +297,8 @@ _bsl_path_argparse() {
                 elif [ -z "${opt['varname']}" ]; then
                     opt['varname']="${1}"
                 else
-                    # editorconfig-checker-disable
+                    # editorconfig-checker-disable-next-line
                     bsl_loge "duplicate VARNAME - '${1}' would overwrite '${opt['varname']}'"
-                    # editorconfig-checker-enable
                     opt_ref=()
                     paths_ref=()
                     return 3
@@ -601,7 +600,7 @@ bsl_path_add() {
         fi
     done
 
-    # start building result by joining curpaths using ':' as seperator ...
+    # start building result by joining curpaths using ':' as separator ...
     local IFS=:
     local result="${curpaths[*]}"
     unset IFS

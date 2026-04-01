@@ -52,11 +52,11 @@ jobs:
             .bats/test-results/*.xml
             .bats/test-results/**/*.xml
 
-# The steps below have long lines that are difficult to avoid - so just disable
-# corresponding checks (otherwise, the lint workflow will fail):
-#
-# editorconfig-checker-disable
-# yamllint disable rule:line-length
+      # The steps below have long lines that are difficult to avoid - so just
+      # disable corresponding checks (otherwise, the lint workflow will fail):
+      #
+      # editorconfig-checker-disable
+      # yamllint disable rule:line-length
       - name: 'Add badge attributes to GITHUB_ENV'
         shell: 'bash'
         run: |

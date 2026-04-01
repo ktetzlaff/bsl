@@ -91,6 +91,7 @@ teardown_file() {
         ['varname']='invalid'
     )
     declare -a paths=('test')
+    # editorconfig-checker-disable-next-line
     _bsl_path_argparse remove opt paths --prepend '/usr/local/bin' || status="${?}"
     assert [ "${status}" -eq 1 ]
     assert [ "${#paths[*]}" -eq 0 ]
@@ -132,6 +133,7 @@ teardown_file() {
         ['varname']='invalid'
     )
     declare -a paths=('test')
+    # editorconfig-checker-disable-next-line
     _bsl_path_argparse remove opt paths --dry-run '/usr/local/bin' || status="${?}"
     if [ "${BSL_BATS_DEBUG:-0}" -gt 0 ]; then
         bslbats_logi "status='${status}'"
@@ -232,7 +234,6 @@ teardown_file() {
     assert_line -n 3 "$(bslbats_prfdir sbin)"
 }
 
-
 @test "bsl_path_ls, --varname TESTPATH" {
     run -0 bsl_path_ls --varname TESTPATH
     assert [ "${#lines[*]}" -eq 4 ]
@@ -251,6 +252,7 @@ teardown_file() {
     assert [ "${TESTPATH}" = '/bin' ]
 }
 
+# editorconfig-checker-disable-next-line-
 @test "bsl_path_clean '/bin:/bin//:////bin//////:/usr/bin/does not exist/..::'" {
     unset status
     TESTPATH='/bin:/bin//:////bin//////:/usr/bin/does not exist/..::'
@@ -334,6 +336,7 @@ teardown_file() {
 
 @test "bsl_path_remove, duplicate '/usr/bin', trailing ':'" {
     unset status
+    # editorconfig-checker-disable-next-line
     TESTPATH="$(bslbats_prfdir /usr/{bin,sbin} /sbin /usr/{bin,local/sbin,bin}):"
     bsl_path_remove --varname TESTPATH '/usr/bin' || status="${?}"
     assert [ -z "${status:-}" ]

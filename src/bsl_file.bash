@@ -1,4 +1,4 @@
-#D# File related funtions.
+#D# File related functions.
 
 #L#
 # Copyright (C) 2023 ktetzlaff <bsl@tetzco.de>
@@ -72,7 +72,7 @@ bsl_dirname() {
 #
 # Returns:
 #     exit status: ``0`` in case of success, any other value indicates an error
-#     stdout: file name without directory compoents (and, if provided, without
+#     stdout: file name without directory components (and, if provided, without
 #         SUFFIX).
 #
 # Examples:
@@ -97,6 +97,7 @@ bsl_dirname() {
 #
 #     $ bsl_basename
 #     # empty line
+#d#
 bsl_basename() {
     local name="${1:-}"
     local ext="${2:-}"
@@ -140,6 +141,7 @@ bsl_basename() {
 #
 #     $ bsl_getext
 #     # empty string
+#d#
 bsl_getext() {
     local name="${1:-}"
 

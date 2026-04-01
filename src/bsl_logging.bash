@@ -153,7 +153,7 @@ bsl_log_level() {
         bsl_die "invalid log level: '${lvl}'"
         return "${?}"
     }
-    # return 0 if new is same as current  leg legel
+    # return 0 if new is same as current log level
     [ "${BSL_LOGLEVEL}" -ne "${lvl}" ] || {
         [ "${verbose}" -eq 0 ] || {
             bsl_log "${BSL_LOGLEVEL}" 'INF' 1 \
@@ -162,7 +162,7 @@ bsl_log_level() {
         }
         return 0
     }
-    # repor change in verbose mode
+    # report change in verbose mode
     [ "${verbose}" -eq 0 ] || {
         bsl_log "${BSL_LOGLEVEL}" 'INF' 1 \
             'log level:' \
@@ -174,7 +174,7 @@ bsl_log_level() {
     BSL_LOGLEVEL="${lvl}"
 }
 
-#D# Check is a symbolic loc level is active.
+#D# Check if a symbolic log level is active.
 bsl_log_level_active_p() {
     local lvl="${1:-}"
     [ -n "${lvl}" ] || return 1

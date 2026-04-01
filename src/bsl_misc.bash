@@ -191,9 +191,8 @@ bsl_create_link() {
     done
 
     if [ "${#positional[@]}" -ne 2 ]; then
-        # editorconfig-checker-disable
+        # editorconfig-checker-disable-next-line
         bsl_logfe "requires 2 positional arguments, got ${#positional[*]}"
-        # editorconfig-checker-enable
         return 1
     fi
     src="${positional[0]}"

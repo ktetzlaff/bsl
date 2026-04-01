@@ -17,6 +17,25 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #l#
 
+#D# Print sourced files to stdout.
+#
+# In case of nested source statements, the order of sourced files is latest
+# first.
+_bsl_init_print_sourced() {
+    local -i verbose="${1:-0}"
+    local prfx=''
+
+    [ "${verbose}" -eq 0 ] || printf -- 'sources: '
+    local -i end="${#FUNCNAME[*]}"
+    for ((i = 1; i < "${end}"; ++i)); do
+        [ "${FUNCNAME[${i}]}" != "source" ] || {
+            printf -- "%s" "${prfx}${BASH_SOURCE[${i}]}"
+            prfx=' '
+        }
+    done
+    [ "${verbose}" -eq 0 ] || printf -- '\n'
+}
+
 [ "${BSL_INIT_DEBUG:-0}" -eq 0 ] || {
     _bsl_init_print_sourced -v 2>/dev/null || echo "sources: ${BASH_SOURCE[*]}"
 }
@@ -190,25 +209,6 @@ _bsl_init_guard() {
     else
         printf -- '%s' "${guard}"
     fi
-}
-
-#D# Print sourced files to stdout.
-#
-# In case of nested source statements, the order of sourced files is latest
-# first.
-_bsl_init_print_sourced() {
-    local -i verbose="${1:-0}"
-    local prfx=''
-
-    [ "${verbose}" -eq 0 ] || printf -- 'sources: '
-    local -i end="${#FUNCNAME[*]}"
-    for ((i = 1; i < "${end}"; ++i)); do
-        [ "${FUNCNAME[${i}]}" != "source" ] || {
-            printf -- "%s" "${prfx}${BASH_SOURCE[${i}]}"
-            prfx=' '
-        }
-    done
-    [ "${verbose}" -eq 0 ] || printf -- '\n'
 }
 
 #D# Initialize BSL library.
