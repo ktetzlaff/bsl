@@ -136,7 +136,7 @@ define git_switch_branch
         git -C '$(1)' fetch --all >/dev/null; \
         git -C '$(1)' switch -C '$(2)' '$(2)' || { \
             echo "[ERR] failed to switch branch, repo: '$(1)', branch: '$(2)'"; \
-            return 1; \
+            exit 1; \
         }; \
         [ -z '$(3)' ] || '$(BSLBATS_CORE_INSTALL)' '$(BSLBATS_BASE_DIR)'; \
     }
