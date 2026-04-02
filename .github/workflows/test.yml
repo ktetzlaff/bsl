@@ -43,8 +43,8 @@ jobs:
         id: 'test-results'
         # The documentation of EnricoMi/publish-unit-test-result-action uses @v1
         # (a *moving* tag which marks the latest v1.x version). However, I
-        # prefer a fixed version (currently the v1.36 tag).
-        uses: 'EnricoMi/publish-unit-test-result-action@v1.36'
+        # prefer a fixed version (currently the v2.23.0 tag).
+        uses: 'EnricoMi/publish-unit-test-result-action@v2.23.0'
         if: 'always()'
         with:
           check_name: 'BATS test results'
