@@ -102,18 +102,3 @@ jobs:
 
           echo "GITHUB_ENV (${GITHUB_ENV}):"
           cat "${GITHUB_ENV}"
-
-      - name: 'Create badge'
-        uses: 'emibcn/badge-action@v1.2.4'
-        with:
-          label: 'Test'
-          status: '${{ env.CONCLUSION }} (${{ env.BADGE_DETAILS }})'
-          color: '${{ env.BADGE_COLOR }}'
-          path: 'testresults-${{ env.REF_NAME }}.svg'
-
-      - name: 'Upload badge to gist'
-        uses: 'andymckay/append-gist-action@1fbfbbce708a39bd45846f0955ed5521f2099c6d'
-        with:
-          token: '${{ secrets.GHACTION_GIST_TOKEN }}'
-          gistURL: 'https://gist.githubusercontent.com/ktetzlaff/c0b639248c938d1d291df0b7da541156'
-          file: 'testresults-${{ env.REF_NAME }}.svg'
