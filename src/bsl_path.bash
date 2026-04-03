@@ -233,7 +233,7 @@ _bsl_path_argparse() {
         fi
     fi
 
-    while [ -n "${1}" ]; do
+    while [ "${#}" -gt 0 ]; do
         case "${1}" in
             -h | --help | -\?)
                 _bsl_path_usage "${action}"
